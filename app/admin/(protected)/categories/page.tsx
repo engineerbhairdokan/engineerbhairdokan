@@ -78,7 +78,7 @@ export default function CategoriesPage() {
                   <input
                     type="checkbox"
                     defaultChecked={c.is_active}
-                    onChange={(e) => startTransition(() => toggleCategoryActive(c.id, e.target.checked))}
+                    onChange={(e) => startTransition(() => { toggleCategoryActive(c.id, e.target.checked); })}
                   />
                 </td>
                 <td className="px-4 py-3 text-right">

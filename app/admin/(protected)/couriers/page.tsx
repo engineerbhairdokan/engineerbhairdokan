@@ -68,7 +68,7 @@ export default function CouriersPage() {
                 <td className="px-4 py-3">{formatBDT(c.charge_outside_dhaka)}</td>
                 <td className="px-4 py-3 text-red-600">{formatBDT(c.return_charge)}</td>
                 <td className="px-4 py-3">
-                  <input type="checkbox" defaultChecked={c.is_active} onChange={(e) => startTransition(() => toggleCourierActive(c.id, e.target.checked))} />
+                  <input type="checkbox" defaultChecked={c.is_active} onChange={(e) => startTransition(() => { toggleCourierActive(c.id, e.target.checked); })} />
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button className="text-red-600 hover:underline" onClick={() => { if (confirm(`Delete ${c.name}?`)) startTransition(async () => { await deleteCourier(c.id); load(); }); }}>

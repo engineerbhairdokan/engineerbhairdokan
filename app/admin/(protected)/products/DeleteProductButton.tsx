@@ -12,7 +12,7 @@ export default function DeleteProductButton({ id, name }: { id: string; name: st
       disabled={isPending}
       onClick={() => {
         if (confirm(`Delete "${name}"? This cannot be undone.`)) {
-          startTransition(() => deleteProduct(id));
+          startTransition(() => { deleteProduct(id); });
         }
       }}
     >

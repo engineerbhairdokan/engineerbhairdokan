@@ -67,7 +67,7 @@ export default function BannersPage() {
               <div>
                 <p className="text-sm font-medium text-ink">{b.title ?? "Untitled"}</p>
                 <label className="flex items-center gap-1.5 text-xs text-ink/50 mt-1">
-                  <input type="checkbox" defaultChecked={b.is_active} onChange={(e) => startTransition(() => toggleBannerActive(b.id, e.target.checked))} />
+                  <input type="checkbox" defaultChecked={b.is_active} onChange={(e) => startTransition(() => { toggleBannerActive(b.id, e.target.checked); })} />
                   Active
                 </label>
               </div>
