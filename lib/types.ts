@@ -74,30 +74,3 @@ export type PlaceOrderResult = {
   order_number: string;
   grand_total: number;
 };
-
-// Minimal Database shape — enough for the typed Supabase client to compile.
-// Extend with `supabase gen types` once the project is live.
-export type Database = {
-  public: {
-    Tables: Record<string, { Row: any; Insert: any; Update: any }>;
-    Views: Record<string, { Row: any }>;
-    Functions: {
-      place_order: {
-        Args: {
-          p_customer_name: string;
-          p_phone: string;
-          p_alt_phone: string | null;
-          p_district: string;
-          p_full_address: string;
-          p_items: PlaceOrderItem[];
-          p_notes: string | null;
-        };
-        Returns: PlaceOrderResult[];
-      };
-      quote_order_total: {
-        Args: { p_district: string; p_items: PlaceOrderItem[] };
-        Returns: { subtotal: number; delivery_charge: number; grand_total: number }[];
-      };
-    };
-  };
-};
