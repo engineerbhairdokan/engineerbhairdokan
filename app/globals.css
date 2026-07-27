@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-baloo: "Baloo 2", system-ui, sans-serif;
+  --font-worksans: "Work Sans", system-ui, sans-serif;
+  --font-plexmono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #F7F1E4;
+  color: #1B2433;
+}
+
+/* Visible keyboard focus everywhere, brand-colored */
+:focus-visible {
+  outline: 3px solid #F3A93B;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* "Spec sheet" price readout — the signature detail: prices are
+   presented like an engineer's measurement, not a sale sticker. */
+.spec-readout {
+  font-family: var(--font-plexmono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
