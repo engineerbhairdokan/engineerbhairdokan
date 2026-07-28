@@ -19,7 +19,7 @@ export default function ExpensesPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("expenses").select("*").order("expense_date", { ascending: false }).limit(100);
-    setExpenses((data as Expense[]) ?? []);
+    setExpenses((data as unknown as Expense[]) ?? []);
   }
   useEffect(() => { load(); }, []);
 

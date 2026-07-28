@@ -62,8 +62,9 @@ function toRow(input: ProductFormInput) {
 export async function createProduct(input: ProductFormInput) {
   const supabase = await createClient();
 
-  const { data: product, error } = await supabase.from("products").insert(toRow(input)).select("id").single();
+  const { data: productData, error } = await supabase.from("products").insert(toRow(input)).select("id").single();
   if (error) return { error: error.message };
+  const product: any = productData;
 
   if (input.imageUrls.length > 0) {
     await supabase.from("product_images").insert(
@@ -126,7 +127,8 @@ export async function deleteProduct(id: string) {
 export async function adjustStock(productId: string, delta: number, note: string) {
   const supabase = await createClient();
 
-  const { data: product } = await supabase.from("products").select("current_stock").eq("id", productId).single();
+  const { data: productData } = await supabase.from("products").select("current_stock").eq("id", productId).single();
+  const product: any = productData;
   if (!product) return { error: "Product not found" };
 
   const newStock = product.current_stock + delta;

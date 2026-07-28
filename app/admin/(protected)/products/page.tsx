@@ -8,10 +8,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
   const supabase = await createClient();
-  const { data: products } = await supabase
+  const productsResult = await supabase
     .from("products")
     .select("id, sku, name, status, regular_price, current_stock, low_stock_threshold, total_cost")
     .order("created_at", { ascending: false });
+  const products = (productsResult.data ?? []) as any[];
 
   return (
     <div className="space-y-5">

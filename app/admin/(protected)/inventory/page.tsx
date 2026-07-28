@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function InventoryPage() {
   const supabase = await createClient();
 
-  const [{ data: products }, { data: history }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from("products").select("id, name, sku, current_stock, low_stock_threshold").order("current_stock"),
     supabase
       .from("stock_history")
@@ -14,6 +14,8 @@ export default async function InventoryPage() {
       .order("created_at", { ascending: false })
       .limit(30),
   ]);
+  const products = (results[0].data ?? []) as any[];
+  const history = (results[1].data ?? []) as any[];
 
   return (
     <div className="space-y-6">

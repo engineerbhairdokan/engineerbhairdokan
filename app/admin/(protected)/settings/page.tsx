@@ -6,10 +6,12 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const [{ data: contact }, { data: delivery }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from("contact_information").select("*").eq("id", 1).single(),
     supabase.from("delivery_settings").select("*").eq("id", 1).single(),
   ]);
+  const contact: any = results[0].data;
+  const delivery: any = results[1].data;
 
   return (
     <div className="space-y-6 max-w-2xl">

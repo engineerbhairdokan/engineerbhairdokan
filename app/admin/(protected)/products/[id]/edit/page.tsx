@@ -7,11 +7,14 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: product }, { data: categories }, { data: images }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from("products").select("*").eq("id", id).single(),
     supabase.from("categories").select("id, name").order("name"),
     supabase.from("product_images").select("image_url, sort_order").eq("product_id", id).order("sort_order"),
   ]);
+  const product: any = results[0].data;
+  const categories = (results[1].data ?? []) as any[];
+  const images = (results[2].data ?? []) as any[];
 
   if (!product) notFound();
 

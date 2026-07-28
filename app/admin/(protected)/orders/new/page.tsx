@@ -3,10 +3,12 @@ import ManualOrderForm from "./ManualOrderForm";
 
 export default async function NewManualOrderPage() {
   const supabase = await createClient();
-  const [{ data: products }, { data: couriers }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from("products").select("id, name, sku, regular_price, current_stock").eq("status", "active").order("name"),
     supabase.from("couriers").select("id, name").eq("is_active", true).order("name"),
   ]);
+  const products = (results[0].data ?? []) as any[];
+  const couriers = (results[1].data ?? []) as any[];
 
   return (
     <div className="max-w-3xl">

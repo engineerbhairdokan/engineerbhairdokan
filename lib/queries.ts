@@ -12,13 +12,13 @@ const PRODUCT_SELECT = `
 export async function getContactInfo(): Promise<ContactInformation | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("contact_information").select("*").eq("id", 1).single();
-  return data as ContactInformation | null;
+  return data as unknown as ContactInformation | null;
 }
 
 export async function getDeliverySettings() {
   const supabase = await createClient();
   const { data } = await supabase.from("delivery_settings").select("*").eq("id", 1).single();
-  return data as { inside_dhaka_charge: number; outside_dhaka_charge: number } | null;
+  return data as unknown as { inside_dhaka_charge: number; outside_dhaka_charge: number } | null;
 }
 
 export async function getActiveBanners(): Promise<Banner[]> {
@@ -28,7 +28,7 @@ export async function getActiveBanners(): Promise<Banner[]> {
     .select("*")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
-  return (data as Banner[]) ?? [];
+  return (data as unknown as Banner[]) ?? [];
 }
 
 export async function getActiveCategories(): Promise<Category[]> {
@@ -38,7 +38,7 @@ export async function getActiveCategories(): Promise<Category[]> {
     .select("*")
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
-  return (data as Category[]) ?? [];
+  return (data as unknown as Category[]) ?? [];
 }
 
 export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
@@ -67,12 +67,13 @@ export async function getNewArrivals(limit = 8): Promise<Product[]> {
 export async function getBestSellers(limit = 8): Promise<Product[]> {
   const supabase = await createClient();
   // best_selling_products view is ordered by units_sold already
-  const { data: ranked } = await supabase
+  const { data: rankedData } = await supabase
     .from("best_selling_products")
     .select("product_id")
     .limit(limit);
+  const ranked = (rankedData ?? []) as any[];
 
-  const ids = (ranked ?? []).map((r: { product_id: string }) => r.product_id);
+  const ids = ranked.map((r) => r.product_id);
   if (ids.length === 0) return [];
 
   const { data } = await supabase.from("products").select(PRODUCT_SELECT).in("id", ids).eq("status", "active");
@@ -93,7 +94,8 @@ export async function getProducts(opts: {
 
   if (search) query = query.ilike("name", `%${search}%`);
   if (categorySlug) {
-    const { data: cat } = await supabase.from("categories").select("id").eq("slug", categorySlug).single();
+    const { data: catData } = await supabase.from("categories").select("id").eq("slug", categorySlug).single();
+    const cat: any = catData;
     if (cat) query = query.eq("category_id", cat.id);
   }
 
@@ -116,5 +118,5 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {
   const supabase = await createClient();
   const { data } = await supabase.from("categories").select("*").eq("slug", slug).eq("is_active", true).single();
-  return (data as Category) ?? null;
+  return (data as unknown as Category) ?? null;
 }

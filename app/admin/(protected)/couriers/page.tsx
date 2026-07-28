@@ -20,7 +20,7 @@ export default function CouriersPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("couriers").select("*").order("name");
-    setCouriers((data as Courier[]) ?? []);
+    setCouriers((data as unknown as Courier[]) ?? []);
   }
   useEffect(() => { load(); }, []);
 

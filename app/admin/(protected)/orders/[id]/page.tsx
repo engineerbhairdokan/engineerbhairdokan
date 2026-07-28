@@ -14,13 +14,19 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: order }, { data: items }, { data: history }, { data: couriers }, { data: invoice }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from("orders").select("*, couriers(name)").eq("id", id).single(),
     supabase.from("order_items").select("*").eq("order_id", id),
     supabase.from("order_status_history").select("status, note, created_at").eq("order_id", id).order("created_at"),
     supabase.from("couriers").select("id, name").eq("is_active", true),
     supabase.from("invoices").select("invoice_number, generated_at").eq("order_id", id).maybeSingle(),
   ]);
+
+  const order: any = results[0].data;
+  const items = (results[1].data ?? []) as any[];
+  const history = (results[2].data ?? []) as any[];
+  const couriers = (results[3].data ?? []) as any[];
+  const invoice: any = results[4].data;
 
   if (!order) notFound();
 

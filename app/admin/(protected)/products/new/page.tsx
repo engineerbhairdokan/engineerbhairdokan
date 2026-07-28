@@ -4,7 +4,8 @@ import { createProduct } from "../actions";
 
 export default async function NewProductPage() {
   const supabase = await createClient();
-  const { data: categories } = await supabase.from("categories").select("id, name").order("name");
+  const { data: categoriesData } = await supabase.from("categories").select("id, name").order("name");
+  const categories = (categoriesData ?? []) as any[];
 
   return (
     <div>

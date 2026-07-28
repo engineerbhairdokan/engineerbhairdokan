@@ -16,7 +16,7 @@ export default function BannersPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("banners").select("*").order("sort_order");
-    setBanners((data as Banner[]) ?? []);
+    setBanners((data as unknown as Banner[]) ?? []);
   }
   useEffect(() => { load(); }, []);
 

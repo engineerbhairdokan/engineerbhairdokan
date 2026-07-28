@@ -62,7 +62,7 @@ export default function OrderForm({
     setState({ status: "submitting" });
     const supabase = createClient();
 
-    const { data, error } = await supabase.rpc("place_order", {
+    const { data: rawData, error } = await supabase.rpc("place_order", {
       p_customer_name: values.name,
       p_phone: values.phone,
       p_alt_phone: values.altPhone || null,
@@ -71,6 +71,7 @@ export default function OrderForm({
       p_items: [{ product_id: productId, quantity }],
       p_notes: values.notes || null,
     });
+    const data = rawData as any[] | null;
 
     if (error || !data || data.length === 0) {
       setState({ status: "error", message: error?.message ?? "Something went wrong placing your order." });

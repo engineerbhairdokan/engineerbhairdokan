@@ -17,7 +17,7 @@ export default function CategoriesPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("categories").select("id, name, slug, is_active").order("name");
-    setCategories((data as Category[]) ?? []);
+    setCategories((data as unknown as Category[]) ?? []);
   }
 
   useEffect(() => {

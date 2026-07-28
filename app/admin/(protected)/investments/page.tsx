@@ -19,7 +19,7 @@ export default function InvestmentsPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("investments").select("*").order("invested_at", { ascending: false });
-    setInvestments((data as Investment[]) ?? []);
+    setInvestments((data as unknown as Investment[]) ?? []);
   }
   useEffect(() => { load(); }, []);
 

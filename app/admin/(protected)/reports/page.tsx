@@ -24,13 +24,19 @@ export default async function ReportsPage({
 
   const supabase = await createClient();
 
-  const [{ data: pl }, { data: salesByDay }, { data: bySource }, { data: bestSellers }, { data: categoryProfit }] = await Promise.all([
+  const results = await Promise.all([
     supabase.rpc("report_profit_loss", { p_start: start, p_end: end }).single(),
     supabase.rpc("report_sales_by_day", { p_start: start, p_end: end }),
     supabase.rpc("report_orders_by_source", { p_start: start, p_end: end }),
     supabase.from("best_selling_products").select("*").limit(10),
     supabase.from("category_profit").select("*"),
   ]);
+
+  const pl: any = results[0].data;
+  const salesByDay = (results[1].data ?? []) as any[];
+  const bySource = (results[2].data ?? []) as any[];
+  const bestSellers = (results[3].data ?? []) as any[];
+  const categoryProfit = (results[4].data ?? []) as any[];
 
   return (
     <div className="space-y-6">

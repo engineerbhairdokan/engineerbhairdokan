@@ -62,7 +62,7 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
     setSubmitting(true);
     const supabase = createClient();
 
-    const { data, error } = await supabase.rpc("place_manual_order", {
+    const { data: rawData, error } = await supabase.rpc("place_manual_order", {
       p_customer_name: name,
       p_phone: phone,
       p_alt_phone: altPhone || null,
@@ -79,6 +79,7 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
       p_tracking_number: tracking || null,
       p_notes: notes || null,
     });
+    const data = rawData as any[] | null;
 
     if (error || !data || data.length === 0) {
       setError(error?.message ?? "Failed to create order.");

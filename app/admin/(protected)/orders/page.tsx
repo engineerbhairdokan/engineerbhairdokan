@@ -26,7 +26,8 @@ export default async function OrdersPage({
   if (source) query = query.eq("order_source", source);
   if (q) query = query.or(`order_number.ilike.%${q}%,customer_name.ilike.%${q}%,customer_phone.ilike.%${q}%`);
 
-  const { data: orders } = await query;
+  const ordersResult = await query;
+  const orders = (ordersResult.data ?? []) as any[];
 
   const filterLink = (params: Record<string, string | undefined>) => {
     const usp = new URLSearchParams();

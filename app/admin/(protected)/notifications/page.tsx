@@ -13,7 +13,7 @@ export default function NotificationsPage() {
   async function load() {
     const supabase = createClient();
     const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(50);
-    setNotifications((data as Notification[]) ?? []);
+    setNotifications((data as unknown as Notification[]) ?? []);
   }
 
   useEffect(() => {

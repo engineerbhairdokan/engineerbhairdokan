@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 async function getDashboardData() {
   const supabase = await createClient();
 
-  const [today, pl, stock, recentOrders, lowStock] = await Promise.all([
+  const [todayResult, plResult, stockResult, recentOrdersResult, lowStockResult] = await Promise.all([
     supabase.from("dashboard_today").select("*").single(),
     supabase.from("profit_loss_summary").select("*").single(),
     supabase.from("stock_value_summary").select("*").single(),
@@ -26,12 +26,18 @@ async function getDashboardData() {
       .limit(6),
   ]);
 
+  const today: any = todayResult.data;
+  const pl: any = plResult.data;
+  const stock: any = stockResult.data;
+  const recentOrders = (recentOrdersResult.data ?? []) as any[];
+  const lowStockAll = (lowStockResult.data ?? []) as any[];
+
   return {
-    today: today.data,
-    pl: pl.data,
-    stock: stock.data,
-    recentOrders: recentOrders.data ?? [],
-    lowStock: (lowStock.data ?? []).filter((p) => p.current_stock <= p.low_stock_threshold),
+    today,
+    pl,
+    stock,
+    recentOrders,
+    lowStock: lowStockAll.filter((p) => p.current_stock <= p.low_stock_threshold),
   };
 }
 
