@@ -12,7 +12,7 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           // Storefront is public/read-mostly; ignore write errors from
           // Server Components (no session to persist for anon visitors).
           try {
