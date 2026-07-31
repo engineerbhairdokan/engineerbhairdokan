@@ -77,7 +77,7 @@ export default function SearchAutocomplete({ placeholder = "Search products..." 
             onFocus={() => suggestions.length > 0 && setOpen(true)}
             placeholder={placeholder}
             autoComplete="off"
-            className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-4 text-sm focus:border-gold outline-none"
+            className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-4 text-sm text-ink placeholder:text-ink/40 focus:border-gold outline-none"
           />
           {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-ink/30" />}
         </div>

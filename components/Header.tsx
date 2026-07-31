@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/products", label: "Products" },
   { href: "/categories", label: "Categories" },
-  { href: "/#contact", label: "Contact" },
 ];
 
 export default function Header({ contact }: { contact: ContactInformation | null }) {
