@@ -4,81 +4,90 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, Tags, ShoppingCart, PlusCircle, Boxes,
-  Truck, Receipt, PiggyBank, Image as ImageIcon, Settings, BarChart3, Bell, X,
+  Truck, Receipt, PiggyBank, Image as ImageIcon, Settings, BarChart3, Bell, X, Tag, Award,
 } from "lucide-react";
 
-const NAV = [
+const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/orders/new", label: "New Manual Order", icon: PlusCircle },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tags },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/coupons", label: "Coupons", icon: Tag },
   { href: "/admin/inventory", label: "Inventory", icon: Boxes },
   { href: "/admin/couriers", label: "Couriers", icon: Truck },
   { href: "/admin/expenses", label: "Expenses", icon: Receipt },
   { href: "/admin/investments", label: "Investments", icon: PiggyBank },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
-  { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { href: "/admin/memberships", label: "Memberships", icon: Award },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
+  { href: "/admin/reports", label: "Reports", icon: BarChart3 },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AdminSidebar({
-  mobileOpen = false,
+  mobileOpen,
   onClose,
 }: {
-  mobileOpen?: boolean;
-  onClose?: () => void;
+  mobileOpen: boolean;
+  onClose: () => void;
 }) {
   const pathname = usePathname();
+
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
   return (
     <>
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-ink/40 lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
-      <nav
-        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 bg-ink text-cream p-4 transform transition-transform duration-200 ease-out
-          lg:static lg:translate-x-0 lg:z-auto lg:min-h-screen lg:w-60
-          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-ink/10 bg-white transition-transform duration-200 lg:static lg:z-auto lg:translate-x-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        <div className="mb-6 flex items-start justify-between px-2">
-          <div>
-            <p className="font-display font-bold text-lg">
-              <span className="text-cream">Engineer</span> <span className="text-gold">Bhai&apos;r</span> <span className="brand-dokan">Dokan</span>
-            </p>
-            <p className="spec-readout text-[10px] text-cream/40">Admin Panel</p>
-          </div>
-          <button onClick={onClose} className="text-cream/60 hover:text-cream lg:hidden" aria-label="Close menu">
+        <div className="flex items-center justify-between px-5 py-4">
+          <Link href="/admin" className="flex items-center gap-2" onClick={onClose}>
+            <PlusCircle className="h-5 w-5 text-gold-600" />
+            <span className="font-display text-lg font-semibold text-ink">
+              Engineer Bhai&apos;r Dokan
+            </span>
+          </Link>
+          <button
+            onClick={onClose}
+            aria-label="Close menu"
+            className="text-ink/60 hover:text-ink lg:hidden"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <ul className="space-y-1">
-          {NAV.map(({ href, label, icon: Icon, exact }) => {
-            const active = exact ? pathname === href : pathname.startsWith(href);
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+            const active = isActive(href, exact);
             return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  onClick={onClose}
-                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
-                    active ? "bg-gold text-ink font-medium" : "text-cream/70 hover:bg-cream/10 hover:text-cream"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </Link>
-              </li>
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={`flex items-center gap-3 rounded-xl2 px-3 py-2 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-gold-100 text-ink"
+                    : "text-ink/60 hover:bg-cream hover:text-ink"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
             );
           })}
-        </ul>
-      </nav>
+        </nav>
+      </aside>
     </>
   );
 }

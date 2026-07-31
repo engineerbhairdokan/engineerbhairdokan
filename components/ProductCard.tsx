@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/types";
 import { getEffectivePrice, getDiscountPercent, formatBDT, primaryImage } from "@/lib/pricing";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const image = primaryImage(product);
@@ -36,6 +37,17 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="absolute inset-0 flex items-center justify-center bg-ink/60">
             <span className="spec-readout text-xs text-cream">Out of stock</span>
           </span>
+        )}
+        {!outOfStock && (
+          <AddToCartButton
+            productId={product.id}
+            name={product.name}
+            slug={product.slug}
+            image={image}
+            price={price}
+            maxStock={product.current_stock}
+            variant="icon"
+          />
         )}
       </div>
 
