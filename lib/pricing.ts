@@ -10,7 +10,6 @@ export function getEffectivePrice(p: Product): number {
   if (p.discount_type === "percentage") {
     return Math.round(p.regular_price * (1 - p.discount_value / 100) * 100) / 100;
   }
-  // fixed or flash_sale
   return Math.max(p.regular_price - p.discount_value, 0);
 }
 

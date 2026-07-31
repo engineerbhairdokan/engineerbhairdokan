@@ -166,4 +166,3 @@ function Stat({ label, value, highlight, negative }: { label: string; value: str
     </div>
   );
 }
-

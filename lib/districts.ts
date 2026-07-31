@@ -1,6 +1,3 @@
-// All 64 districts of Bangladesh. "Dhaka" triggers the inside-Dhaka
-// delivery charge; everything else is "outside Dhaka" — matching the
-// calculate_delivery_charge() function in the database.
 export const BANGLADESH_DISTRICTS = [
   "Dhaka", "Faridpur", "Gazipur", "Gopalganj", "Kishoreganj", "Madaripur",
   "Manikganj", "Munshiganj", "Narayanganj", "Narsingdi", "Rajbari",

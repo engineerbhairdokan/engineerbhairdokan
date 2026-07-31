@@ -19,7 +19,6 @@ export default function HeroSlider({ banners }: { banners: Banner[] }) {
     const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
     emblaApi.on("select", onSelect);
 
-    // Auto-advance every 6s — respects reduced-motion via the CSS rule
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const id = prefersReduced ? null : setInterval(() => emblaApi.scrollNext(), 6000);
     return () => {

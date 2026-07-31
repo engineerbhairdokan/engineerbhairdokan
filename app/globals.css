@@ -17,7 +17,6 @@ body {
   color: #1B2433;
 }
 
-/* Visible keyboard focus everywhere, brand-colored */
 :focus-visible {
   outline: 3px solid #F3A93B;
   outline-offset: 2px;
@@ -33,10 +32,17 @@ body {
   }
 }
 
-/* "Spec sheet" price readout — the signature detail: prices are
-   presented like an engineer's measurement, not a sale sticker. */
 .spec-readout {
   font-family: var(--font-plexmono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.brand-dokan {
+  color: #0A0F16;
+  text-shadow:
+    -1px -1px 0 #F7F1E4,
+     1px -1px 0 #F7F1E4,
+    -1px  1px 0 #F7F1E4,
+     1px  1px 0 #F7F1E4;
 }

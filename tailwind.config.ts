@@ -6,20 +6,20 @@ const config: Config = {
     extend: {
       colors: {
         ink: {
-          DEFAULT: "#1B2433",   // navy from the mascot's shirt / logo ring
+          DEFAULT: "#1B2433",
           800: "#242F42",
           700: "#374357",
         },
         gold: {
-          DEFAULT: "#F3A93B",   // "Bhai'r" gold from the logo
+          DEFAULT: "#F3A93B",
           600: "#E0941F",
           100: "#FCEBCB",
         },
         wood: {
-          DEFAULT: "#9C6A34",   // the wooden signage plank behind "Dokan"
+          DEFAULT: "#9C6A34",
           700: "#7A5127",
         },
-        cream: "#F7F1E4",       // logo background
+        cream: "#F7F1E4",
       },
       fontFamily: {
         display: ["var(--font-baloo)", "system-ui", "sans-serif"],

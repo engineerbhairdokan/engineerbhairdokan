@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LogOut, Menu } from "lucide-react";
 
-export default function AdminTopbar({ name, role }: { name: string; role: string }) {
+export default function AdminTopbar({
+  name,
+  role,
+  onMenuClick,
+}: {
+  name: string;
+  role: string;
+  onMenuClick?: () => void;
+}) {
   const router = useRouter();
 
   async function signOut() {
@@ -16,7 +24,9 @@ export default function AdminTopbar({ name, role }: { name: string; role: string
 
   return (
     <div className="flex items-center justify-between border-b border-ink/10 bg-white px-5 py-3">
-      <button className="lg:hidden text-ink"><Menu className="h-5 w-5" /></button>
+      <button onClick={onMenuClick} className="text-ink lg:hidden" aria-label="Open menu">
+        <Menu className="h-5 w-5" />
+      </button>
       <div className="flex-1" />
       <div className="flex items-center gap-3">
         <div className="text-right">

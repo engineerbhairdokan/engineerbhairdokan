@@ -5,13 +5,13 @@ import type { ContactInformation } from "@/lib/types";
 
 export default function Header({ contact }: { contact: ContactInformation | null }) {
   return (
-    <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-ink/10">
+    <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur border-b border-cream/10">
       <div className="mx-auto max-w-6xl px-4">
         <div className="flex items-center justify-between gap-4 py-3">
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image src={contact?.logo_url || "/logo.png"} alt={contact?.business_name ?? "Engineer Bhai'r Dokan"} width={44} height={44} className="rounded-full" priority />
-            <span className="font-display font-extrabold text-lg leading-tight text-ink hidden sm:block">
-              Engineer <span className="text-gold-600">Bhai&apos;r</span> Dokan
+            <span className="font-display font-extrabold text-lg leading-tight hidden sm:block">
+              <span className="text-cream">Engineer</span> <span className="text-gold">Bhai&apos;r</span> <span className="brand-dokan">Dokan</span>
             </span>
           </Link>
 
@@ -30,7 +30,7 @@ export default function Header({ contact }: { contact: ContactInformation | null
             {contact?.phone && (
               <a
                 href={`tel:${contact.phone}`}
-                className="hidden sm:flex items-center gap-1.5 rounded-full bg-ink text-cream text-sm font-medium px-4 py-2 hover:bg-ink-700 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 rounded-full bg-gold text-ink text-sm font-medium px-4 py-2 hover:bg-gold-600 transition-colors"
               >
                 <Phone className="h-3.5 w-3.5" /> {contact.phone}
               </a>

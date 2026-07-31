@@ -66,7 +66,6 @@ export async function getNewArrivals(limit = 8): Promise<Product[]> {
 
 export async function getBestSellers(limit = 8): Promise<Product[]> {
   const supabase = await createClient();
-  // best_selling_products view is ordered by units_sold already
   const { data: rankedData } = await supabase
     .from("best_selling_products")
     .select("product_id")

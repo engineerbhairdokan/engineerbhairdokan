@@ -1,4 +1,5 @@
 import HeroSlider from "@/components/HeroSlider";
+import HeroCTAButtons from "@/components/HeroCTAButtons";
 import CategoryPills from "@/components/CategoryPills";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
@@ -8,20 +9,25 @@ import {
   getFeaturedProducts,
   getNewArrivals,
   getBestSellers,
+  getContactInfo,
 } from "@/lib/queries";
 
 export default async function HomePage() {
-  const [banners, categories, featured, newArrivals, bestSellers] = await Promise.all([
+  const [banners, categories, featured, newArrivals, bestSellers, contact] = await Promise.all([
     getActiveBanners(),
     getActiveCategories(),
     getFeaturedProducts(),
     getNewArrivals(),
     getBestSellers(),
+    getContactInfo(),
   ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 space-y-14">
-      <HeroSlider banners={banners} />
+      <div className="space-y-5">
+        <HeroSlider banners={banners} />
+        <HeroCTAButtons whatsapp={contact?.whatsapp ?? null} />
+      </div>
 
       <section>
         <p className="spec-readout text-xs text-gold-600 mb-3">Browse</p>

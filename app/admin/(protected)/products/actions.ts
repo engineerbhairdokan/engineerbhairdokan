@@ -43,8 +43,8 @@ function toRow(input: ProductFormInput) {
     regular_price: input.regularPrice,
     discount_type: input.discountType,
     discount_value: input.discountValue,
-    discount_start_date: input.discountStartDate,
-    discount_end_date: input.discountEndDate,
+    discount_start_date: input.discountStartDate || null,
+    discount_end_date: input.discountEndDate || null,
     purchase_cost: input.purchaseCost,
     shipping_cost: input.shippingCost,
     packaging_cost: input.packagingCost,
@@ -77,7 +77,6 @@ export async function createProduct(input: ProductFormInput) {
     );
   }
 
-  // Record the starting stock as an initial_stock movement for a clean audit trail
   if (input.currentStock > 0) {
     await supabase.from("stock_history").insert({
       product_id: product.id,
@@ -98,7 +97,6 @@ export async function updateProduct(id: string, input: ProductFormInput) {
   const { error } = await supabase.from("products").update(toRow(input)).eq("id", id);
   if (error) return { error: error.message };
 
-  // Replace image list wholesale — simplest correct behaviour for this form
   await supabase.from("product_images").delete().eq("product_id", id);
   if (input.imageUrls.length > 0) {
     await supabase.from("product_images").insert(

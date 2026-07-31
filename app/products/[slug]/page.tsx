@@ -18,7 +18,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="grid gap-10 lg:grid-cols-2">
-        {/* Gallery */}
         <div>
           <div className="relative aspect-square rounded-2xl bg-white border border-ink/10 overflow-hidden">
             {images[0] ? (
@@ -43,7 +42,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           )}
         </div>
 
-        {/* Info + Order Form */}
         <div>
           {product.categories && (
             <p className="spec-readout text-xs text-gold-600 mb-2">{product.categories.name}</p>

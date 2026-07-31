@@ -71,12 +71,12 @@ export default function ProductForm({
   async function submit(data: ProductFormInput) {
     setSubmitting(true);
     setServerError(null);
-    const result = await onSubmit({ ...data, imageUrls: images });
+    const finalImages = newImageUrl.trim() ? [...images, newImageUrl.trim()] : images;
+    const result = await onSubmit({ ...data, imageUrls: finalImages });
     if (result?.error) {
       setServerError(result.error);
       setSubmitting(false);
     }
-    // on success the action redirects, so no need to reset submitting
   }
 
   return (

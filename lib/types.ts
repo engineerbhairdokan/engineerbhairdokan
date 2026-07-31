@@ -1,8 +1,3 @@
-// Hand-written types matching schema/01-02_schema_*.sql.
-// Once your Supabase project is live, replace this file by running:
-//   npx supabase gen types typescript --project-id <your-project-ref> > lib/types.ts
-// and re-export the pieces below from the generated Database type.
-
 export type Category = {
   id: string;
   name: string;
