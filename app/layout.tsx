@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloatButton from "@/components/WhatsAppFloatButton";
+import { CartProvider } from "@/lib/cart/CartContext";
 import { getContactInfo } from "@/lib/queries";
 
 const baloo = Baloo_2({ subsets: ["latin"], variable: "--font-baloo", weight: ["500", "600", "700", "800"] });
@@ -22,10 +23,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${baloo.variable} ${workSans.variable} ${plexMono.variable}`}>
       <body className="font-body antialiased flex min-h-screen flex-col">
-        <Header contact={contact} />
-        <main className="flex-1">{children}</main>
-        <Footer contact={contact} />
-        <WhatsAppFloatButton whatsapp={contact?.whatsapp ?? null} />
+        <CartProvider>
+          <Header contact={contact} />
+          <main className="flex-1">{children}</main>
+          <Footer contact={contact} />
+          <WhatsAppFloatButton whatsapp={contact?.whatsapp ?? null} />
+        </CartProvider>
       </body>
     </html>
   );

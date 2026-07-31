@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getProductBySlug, getDeliverySettings } from "@/lib/queries";
 import { getEffectivePrice, getDiscountPercent, formatBDT } from "@/lib/pricing";
 import OrderForm from "@/components/OrderForm";
+import AddToCartButton from "@/components/AddToCartButton";
 import { ShieldCheck, Truck, PackageCheck } from "lucide-react";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -70,19 +71,36 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <span className="flex items-center gap-1"><PackageCheck className="h-4 w-4 text-gold-600" /> COD available</span>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 space-y-3">
             {outOfStock ? (
               <div className="rounded-2xl border border-ink/10 bg-cream p-5 text-center">
                 <p className="font-display font-bold text-ink">Currently Out of Stock</p>
                 <p className="text-sm text-ink/50 mt-1">Message us on WhatsApp to get notified when it&apos;s back.</p>
               </div>
             ) : (
-              <OrderForm
-                productId={product.id}
-                unitPrice={price}
-                insideDhakaCharge={delivery?.inside_dhaka_charge ?? 70}
-                outsideDhakaCharge={delivery?.outside_dhaka_charge ?? 130}
-              />
+              <>
+                <div className="w-full [&>button]:w-full">
+                  <AddToCartButton
+                    productId={product.id}
+                    name={product.name}
+                    slug={product.slug}
+                    image={images[0]?.image_url ?? null}
+                    price={price}
+                    maxStock={product.current_stock}
+                  />
+                </div>
+                <div className="flex items-center gap-3 text-xs text-ink/40">
+                  <div className="h-px flex-1 bg-ink/10" />
+                  <span>OR BUY THIS ITEM ALONE</span>
+                  <div className="h-px flex-1 bg-ink/10" />
+                </div>
+                <OrderForm
+                  productId={product.id}
+                  unitPrice={price}
+                  insideDhakaCharge={delivery?.inside_dhaka_charge ?? 70}
+                  outsideDhakaCharge={delivery?.outside_dhaka_charge ?? 130}
+                />
+              </>
             )}
           </div>
 

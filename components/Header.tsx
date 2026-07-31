@@ -1,54 +1,103 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, Phone } from "lucide-react";
+import { Menu, X, User } from "lucide-react";
 import type { ContactInformation } from "@/lib/types";
+import CartIcon from "@/components/CartIcon";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
+
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Products" },
+  { href: "/categories", label: "Categories" },
+  { href: "/#contact", label: "Contact" },
+];
 
 export default function Header({ contact }: { contact: ContactInformation | null }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur border-b border-cream/10">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex items-center justify-between gap-4 py-3">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Image src={contact?.logo_url || "/logo.png"} alt={contact?.business_name ?? "Engineer Bhai'r Dokan"} width={44} height={44} className="rounded-full" priority />
-            <span className="font-display font-extrabold text-lg leading-tight hidden sm:block">
-              <span className="text-cream">Engineer</span> <span className="text-gold">Bhai&apos;r</span> <span className="brand-dokan">Dokan</span>
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 bg-ink text-cream">
+      <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          {contact?.logo_url ? (
+            <Image
+              src={contact.logo_url}
+              alt={contact.business_name}
+              width={36}
+              height={36}
+              className="rounded-lg object-contain"
+            />
+          ) : null}
+          <span className="font-display text-lg font-bold leading-tight sm:text-xl">
+            <span className="text-cream">Engineer</span>{" "}
+            <span className="text-gold">Bhai&apos;r</span>{" "}
+            <span className="brand-dokan">Dokan</span>
+          </span>
+        </Link>
 
-          <form action="/products" className="flex-1 max-w-md hidden md:flex items-center">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" />
-              <input
-                name="q"
-                placeholder="Search gadgets & accessories..."
-                className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-4 text-sm focus:border-gold outline-none"
-              />
-            </div>
-          </form>
+        <nav className="hidden items-center gap-6 lg:flex">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-sm font-medium text-cream/80 hover:text-gold transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {contact?.phone && (
-              <a
-                href={`tel:${contact.phone}`}
-                className="hidden sm:flex items-center gap-1.5 rounded-full bg-gold text-ink text-sm font-medium px-4 py-2 hover:bg-gold-600 transition-colors"
-              >
-                <Phone className="h-3.5 w-3.5" /> {contact.phone}
-              </a>
-            )}
-          </div>
+        <div className="hidden flex-1 md:block">
+          <SearchAutocomplete />
         </div>
 
-        <form action="/products" className="md:hidden pb-3 flex">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" />
-            <input
-              name="q"
-              placeholder="Search products..."
-              className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-4 text-sm outline-none"
-            />
-          </div>
-        </form>
+        <div className="ml-auto flex items-center gap-1">
+          <Link
+            href="/account"
+            className="hidden h-9 w-9 items-center justify-center rounded-full hover:bg-cream/10 sm:flex"
+            aria-label="Account"
+          >
+            <User className="h-5 w-5 text-cream" />
+          </Link>
+          <CartIcon />
+          <button
+            onClick={() => setMobileOpen((v) => !v)}
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-full hover:bg-cream/10 lg:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
+
+      <div className="px-4 pb-3 md:hidden">
+        <SearchAutocomplete />
+      </div>
+
+      {mobileOpen && (
+        <nav className="flex flex-col gap-1 border-t border-cream/10 px-4 py-3 lg:hidden">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-2 py-2 text-sm font-medium text-cream/80 hover:bg-cream/10 hover:text-gold"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <Link
+            href="/account"
+            onClick={() => setMobileOpen(false)}
+            className="rounded-lg px-2 py-2 text-sm font-medium text-cream/80 hover:bg-cream/10 hover:text-gold"
+          >
+            Account
+          </Link>
+        </nav>
+      )}
     </header>
   );
 }
