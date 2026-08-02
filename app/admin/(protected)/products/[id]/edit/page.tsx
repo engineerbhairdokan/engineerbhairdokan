@@ -43,13 +43,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     isFeatured: product.is_featured,
     isNewArrival: product.is_new_arrival,
     imageUrls: (images ?? []).map((i) => i.image_url),
+    videoUrl: product.video_url,
   };
+
+  const updateProductWithId = updateProduct.bind(null, id);
 
   return (
     <div>
       <p className="spec-readout text-xs text-gold-600">Products</p>
       <h1 className="font-display font-bold text-2xl text-ink mb-5">Edit Product</h1>
-      <ProductForm categories={categories ?? []} initial={initial} onSubmit={(data) => updateProduct(id, data)} submitLabel="Save Changes" />
+      <ProductForm categories={categories ?? []} initial={initial} onSubmit={updateProductWithId} submitLabel="Save Changes" />
     </div>
   );
 }

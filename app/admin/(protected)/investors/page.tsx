@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
-import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon } from "lucide-react";
+import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon, UserCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +19,7 @@ export default async function InvestorsPage() {
   const balances = new Map(((balancesResult.data as any[]) ?? []).map((b) => [b.investor_id, Number(b.balance)]));
   const pendingDeposits = pendingDepositsResult.count ?? 0;
   const pendingWithdrawals = pendingWithdrawalsResult.count ?? 0;
+  const pendingApprovals = investors.filter((i) => i.status === "pending_approval").length;
 
   const totalBalance = [...balances.values()].reduce((a, b) => a + b, 0);
 
@@ -34,8 +35,9 @@ export default async function InvestorsPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <StatCard label="Total Investors" value={investors.length.toString()} icon={TrendingUp} />
+        <StatCard label="Pending Approval" value={pendingApprovals.toString()} icon={UserCheck} highlight={pendingApprovals > 0} />
         <StatCard label="Total Balance Held" value={formatBDT(totalBalance)} icon={Wallet} />
         <Link href="/admin/investors/deposits">
           <StatCard label="Pending Deposits" value={pendingDeposits.toString()} icon={FileClock} highlight={pendingDeposits > 0} />
@@ -63,8 +65,12 @@ export default async function InvestorsPage() {
                   <p className="text-ink/40 text-xs">{inv.phone}{inv.email ? ` · ${inv.email}` : ""}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${inv.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
-                    {inv.status}
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                    inv.status === "active" ? "bg-emerald-100 text-emerald-700" :
+                    inv.status === "pending_approval" ? "bg-amber-100 text-amber-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>
+                    {inv.status.replace("_", " ")}
                   </span>
                 </td>
                 <td className="px-4 py-3 font-medium text-ink">{formatBDT(balances.get(inv.id) ?? 0)}</td>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Lock } from "lucide-react";
 
@@ -60,6 +61,9 @@ export default function AdminLoginPage() {
               className="w-full rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-gold"
             />
           </div>
+          <p className="text-right text-xs -mt-2">
+            <Link href="/account/forgot-password" className="text-gold-600 hover:underline">Forgot password?</Link>
+          </p>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
 

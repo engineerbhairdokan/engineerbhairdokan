@@ -8,14 +8,11 @@ import type { ContactInformation } from "@/lib/types";
 import CartIcon from "@/components/CartIcon";
 import SearchAutocomplete from "@/components/SearchAutocomplete";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/products", label: "Products" },
-  { href: "/categories", label: "Categories" },
-];
+const NAV_LINKS: { href: string; label: string }[] = [];
 
-export default function Header({ contact }: { contact: ContactInformation | null }) {
+export default function Header({ contact, customerName }: { contact: ContactInformation | null; customerName?: string | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const firstName = customerName?.split(" ")[0];
 
   return (
     <header className="sticky top-0 z-50 bg-ink text-cream">
@@ -56,10 +53,11 @@ export default function Header({ contact }: { contact: ContactInformation | null
         <div className="ml-auto flex items-center gap-1">
           <Link
             href="/account"
-            className="hidden h-9 w-9 items-center justify-center rounded-full hover:bg-cream/10 sm:flex"
+            className="hidden items-center gap-1.5 rounded-full px-2 h-9 hover:bg-cream/10 sm:flex"
             aria-label="Account"
           >
             <User className="h-5 w-5 text-cream" />
+            {firstName && <span className="text-sm font-medium text-cream max-w-[100px] truncate">{firstName}</span>}
           </Link>
           <CartIcon />
           <button
@@ -93,7 +91,7 @@ export default function Header({ contact }: { contact: ContactInformation | null
             onClick={() => setMobileOpen(false)}
             className="rounded-lg px-2 py-2 text-sm font-medium text-cream/80 hover:bg-cream/10 hover:text-gold"
           >
-            Account
+            {firstName ? `Hi, ${firstName}` : "Account"}
           </Link>
         </nav>
       )}

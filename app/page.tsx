@@ -1,6 +1,5 @@
 import HeroSlider from "@/components/HeroSlider";
 import HeroCTAButtons from "@/components/HeroCTAButtons";
-import CategoryPills from "@/components/CategoryPills";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import {
@@ -28,11 +27,6 @@ export default async function HomePage() {
         <HeroSlider banners={banners} />
         <HeroCTAButtons whatsapp={contact?.whatsapp ?? null} />
       </div>
-
-      <section>
-        <p className="spec-readout text-xs text-gold-600 mb-3">Browse</p>
-        <CategoryPills categories={categories} />
-      </section>
 
       {featured.length > 0 && (
         <section>

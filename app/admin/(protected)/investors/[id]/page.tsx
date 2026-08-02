@@ -5,6 +5,9 @@ import { formatBDT } from "@/lib/pricing";
 import { ArrowLeft } from "lucide-react";
 import AdjustBalanceForm from "./AdjustBalanceForm";
 import StatusToggle from "./StatusToggle";
+import ApproveInvestorButton from "./ApproveInvestorButton";
+import InvestorDocLink from "./InvestorDocLink";
+import RecordInvestmentForm from "./RecordInvestmentForm";
 
 export const dynamic = "force-dynamic";
 
@@ -38,13 +41,26 @@ export default async function InvestorDetailPage({ params }: { params: Promise<{
         <div>
           <h1 className="font-display font-bold text-2xl text-ink">{investor.name}</h1>
           <p className="text-sm text-ink/60 mt-1">{investor.phone}{investor.email ? ` · ${investor.email}` : ""}</p>
-          <div className="mt-2"><StatusToggle investorId={investor.id} status={investor.status} /></div>
+          {investor.nid_number && <p className="text-xs text-ink/40 mt-1">NID: {investor.nid_number}</p>}
+          <div className="mt-3 flex flex-wrap items-center gap-4">
+            <InvestorDocLink path={investor.nid_document_url} label="NID Document" />
+            <InvestorDocLink path={investor.deal_document_url} label="Deal Document" />
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            {investor.status === "pending_approval" ? (
+              <ApproveInvestorButton investorId={investor.id} />
+            ) : (
+              <StatusToggle investorId={investor.id} status={investor.status} />
+            )}
+          </div>
         </div>
         <div className="text-right">
           <p className="text-xs text-ink/40">Current Balance</p>
           <p className="font-display font-bold text-2xl text-ink">{formatBDT(balance)}</p>
         </div>
       </div>
+
+      {investor.status === "active" && <RecordInvestmentForm investorId={investor.id} />}
 
       <AdjustBalanceForm investorId={investor.id} />
 

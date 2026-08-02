@@ -12,6 +12,7 @@ export default function SettingsForm({ settings }: { settings: any }) {
     defaultProfitPercent: settings?.default_profit_percent ?? 10,
     defaultLossPercent: settings?.default_loss_percent ?? 100,
     policyText: settings?.policy_text ?? "",
+    dealInstructionsText: settings?.deal_instructions_text ?? "",
     bankName: settings?.bank_name ?? "",
     bankAccountName: settings?.bank_account_name ?? "",
     bankAccountNumber: settings?.bank_account_number ?? "",
@@ -72,6 +73,12 @@ export default function SettingsForm({ settings }: { settings: any }) {
       <div className="rounded-2xl border border-ink/10 bg-white p-4">
         <Field label="Investment Rules & Policy (shown at investor signup)">
           <textarea rows={8} value={form.policyText} onChange={(e) => set("policyText", e.target.value)} className="input" />
+        </Field>
+      </div>
+
+      <div className="rounded-2xl border border-ink/10 bg-white p-4">
+        <Field label="Deal Document Instructions (tells investors what to write/sign in their agreement PDF)">
+          <textarea rows={5} value={form.dealInstructionsText} onChange={(e) => set("dealInstructionsText", e.target.value)} className="input" />
         </Field>
       </div>
 

@@ -10,6 +10,7 @@ export type CurrentCustomer = {
   membership_discount_percent: number;
   membership_valid_until: string | null;
   membership_card_number: string | null;
+  membership_started_at: string | null;
 };
 
 export async function getCurrentCustomer(): Promise<CurrentCustomer | null> {
@@ -19,7 +20,7 @@ export async function getCurrentCustomer(): Promise<CurrentCustomer | null> {
 
   const { data } = await supabase
     .from("customers")
-    .select("id, name, phone, email, loyalty_points, membership_status, membership_discount_percent, membership_valid_until, membership_card_number")
+    .select("id, name, phone, email, loyalty_points, membership_status, membership_discount_percent, membership_valid_until, membership_card_number, membership_started_at")
     .eq("auth_user_id", user.id)
     .single();
 

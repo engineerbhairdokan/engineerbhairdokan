@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formatBDT } from "@/lib/pricing";
-import { Loader2, Plus, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { Loader2, Upload, X, Video } from "lucide-react";
 import type { ProductFormInput } from "@/app/admin/(protected)/products/actions";
 
 type Category = { id: string; name: string };
@@ -20,9 +21,14 @@ export default function ProductForm({
   submitLabel: string;
 }) {
   const [images, setImages] = useState<string[]>(initial?.imageUrls ?? []);
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState<string | null>(initial?.videoUrl ?? null);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, watch } = useForm<ProductFormInput>({
     defaultValues: {
@@ -68,11 +74,51 @@ export default function ProductForm({
   const grossProfit = Number(values.regularPrice || 0) - totalCost;
   const profitPercent = values.regularPrice > 0 ? Math.round((grossProfit / values.regularPrice) * 100) : 0;
 
+  async function handleImageFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setUploadingImages(true);
+    setUploadError(null);
+    const supabase = createClient();
+    const uploaded: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const { error } = await supabase.storage.from("Images").upload(path, file);
+      if (error) {
+        setUploadError(error.message);
+        continue;
+      }
+      const { data } = supabase.storage.from("Images").getPublicUrl(path);
+      uploaded.push(data.publicUrl);
+    }
+
+    setImages((prev) => [...prev, ...uploaded]);
+    setUploadingImages(false);
+    if (imageInputRef.current) imageInputRef.current.value = "";
+  }
+
+  async function handleVideoFile(file: File | null) {
+    if (!file) return;
+    setUploadingVideo(true);
+    setUploadError(null);
+    const supabase = createClient();
+    const path = `products/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("product-videos").upload(path, file);
+    if (error) {
+      setUploadError(error.message);
+      setUploadingVideo(false);
+      return;
+    }
+    const { data } = supabase.storage.from("product-videos").getPublicUrl(path);
+    setVideoUrl(data.publicUrl);
+    setUploadingVideo(false);
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  }
+
   async function submit(data: ProductFormInput) {
     setSubmitting(true);
     setServerError(null);
-    const finalImages = newImageUrl.trim() ? [...images, newImageUrl.trim()] : images;
-    const result = await onSubmit({ ...data, imageUrls: finalImages });
+    const result = await onSubmit({ ...data, imageUrls: images, videoUrl });
     if (result?.error) {
       setServerError(result.error);
       setSubmitting(false);
@@ -125,29 +171,26 @@ export default function ProductForm({
         </div>
       </Section>
 
-      <Section title="Images">
-        <div className="flex gap-2 mb-3">
-          <input
-            value={newImageUrl}
-            onChange={(e) => setNewImageUrl(e.target.value)}
-            placeholder="Paste Supabase Storage image URL"
-            className="input"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              if (newImageUrl.trim()) {
-                setImages((prev) => [...prev, newImageUrl.trim()]);
-                setNewImageUrl("");
-              }
-            }}
-            className="shrink-0 rounded-xl bg-ink px-4 text-cream"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+      <Section title="Images & Video">
+        <div>
+          <span className="mb-1 block text-xs font-medium text-ink/60">Product Images (multiple allowed)</span>
+          <label className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ink/20 py-5 cursor-pointer hover:border-gold text-sm text-ink/50">
+            {uploadingImages ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {uploadingImages ? "Uploading..." : "Click to upload one or more images"}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={uploadingImages}
+              onChange={(e) => handleImageFiles(e.target.files)}
+            />
+          </label>
         </div>
+
         {images.length > 0 && (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2 mt-3">
             {images.map((url, i) => (
               <div key={i} className="relative aspect-square rounded-lg border border-ink/10 overflow-hidden bg-cream">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -164,6 +207,35 @@ export default function ProductForm({
             ))}
           </div>
         )}
+
+        <div className="pt-2 border-t border-ink/10">
+          <span className="mb-1 block text-xs font-medium text-ink/60">Product Video (optional)</span>
+          {videoUrl ? (
+            <div className="flex items-center justify-between rounded-xl border border-ink/10 bg-cream px-3 py-2">
+              <span className="flex items-center gap-2 text-sm text-ink truncate">
+                <Video className="h-4 w-4 text-gold-600 shrink-0" /> Video attached
+              </span>
+              <button type="button" onClick={() => setVideoUrl(null)} className="text-ink/40 hover:text-ink">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ink/20 py-5 cursor-pointer hover:border-gold text-sm text-ink/50">
+              {uploadingVideo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+              {uploadingVideo ? "Uploading..." : "Click to upload a product video"}
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                disabled={uploadingVideo}
+                onChange={(e) => handleVideoFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          )}
+        </div>
+
+        {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
       </Section>
 
       <Section title="Pricing & Discount">

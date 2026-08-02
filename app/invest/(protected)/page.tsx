@@ -72,8 +72,7 @@ export default async function InvestorDashboardPage() {
         </h2>
         {investments.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-ink/20 py-10 text-center text-ink/40">
-            No investments yet.{" "}
-            <Link href="/invest/invest" className="text-gold-600 hover:underline">Invest in a product</Link>
+            No investments yet. Your admin will record an investment for you once your funds are allocated to a product.
           </div>
         ) : (
           <div className="space-y-3">

@@ -18,6 +18,9 @@ const SOURCES = [
   { value: "whatsapp", label: "WhatsApp" },
   { value: "phone_call", label: "Phone Call" },
   { value: "walk_in", label: "Walk-in" },
+  { value: "daraz", label: "Daraz" },
+  { value: "merchant", label: "Merchant" },
+  { value: "chat", label: "Website Chat" },
 ];
 
 export default function ManualOrderForm({ products, couriers }: { products: ProductOption[]; couriers: CourierOption[] }) {

@@ -44,7 +44,9 @@ export default function CustomerLoginPage() {
         <User className="h-5 w-5 text-ink" />
       </div>
       <h1 className="text-center font-display font-bold text-xl text-ink">My Account</h1>
-      <p className="text-center text-sm text-ink/50 mt-1 mb-6">Log in to track orders and points</p>
+      <p className="text-center text-sm text-ink/50 mt-1 mb-6">
+        Sign up and order to earn reward points, claim your Bhai Brother Membership Card, and create your own discount coupons!
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <label className="block">

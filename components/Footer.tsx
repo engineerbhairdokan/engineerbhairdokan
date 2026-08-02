@@ -21,7 +21,6 @@ export default function Footer({ contact }: { contact: ContactInformation | null
             <li><Link href="/products" className="hover:text-gold">All Products</Link></li>
             <li><Link href="/products?sort=newest" className="hover:text-gold">New Arrivals</Link></li>
             <li><Link href="/products?featured=1" className="hover:text-gold">Featured</Link></li>
-            <li><Link href="/invest/register" className="hover:text-gold">Become an Investor</Link></li>
           </ul>
         </div>
 

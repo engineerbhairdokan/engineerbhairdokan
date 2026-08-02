@@ -5,7 +5,7 @@ export type CurrentInvestor = {
   name: string;
   phone: string;
   email: string | null;
-  status: "active" | "suspended";
+  status: "pending_approval" | "active" | "suspended";
   balance: number;
 };
 

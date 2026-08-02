@@ -29,6 +29,7 @@ export type ProductFormInput = {
   isFeatured: boolean;
   isNewArrival: boolean;
   imageUrls: string[];
+  videoUrl: string | null;
 };
 
 function toRow(input: ProductFormInput) {
@@ -56,6 +57,7 @@ function toRow(input: ProductFormInput) {
     low_stock_threshold: input.lowStockThreshold,
     is_featured: input.isFeatured,
     is_new_arrival: input.isNewArrival,
+    video_url: input.videoUrl || null,
   };
 }
 

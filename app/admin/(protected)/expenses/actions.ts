@@ -3,13 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function createExpense(input: { category: string; amount: number; description: string; expenseDate: string }) {
+export async function createExpense(input: { category: string; amount: number; description: string; expenseDate: string; productId?: string | null }) {
   const supabase = await createClient();
   const { error } = await supabase.from("expenses").insert({
     category: input.category,
     amount: input.amount,
     description: input.description || null,
     expense_date: input.expenseDate,
+    product_id: input.productId || null,
   });
   if (error) return { error: error.message };
   revalidatePath("/admin/expenses");

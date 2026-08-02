@@ -31,7 +31,7 @@ export default function ApplyMembershipButton() {
         className="flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-display font-bold text-ink hover:bg-gold-600 disabled:opacity-60"
       >
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Award className="h-4 w-4" />}
-        Apply for Bhai Brother Membership
+        Activate Membership (uses 6 points)
       </button>
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>

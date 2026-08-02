@@ -7,7 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import { BANGLADESH_DISTRICTS } from "@/lib/districts";
 import { formatBDT } from "@/lib/pricing";
-import { CheckCircle2, Loader2, Minus, Plus, Tag, X, MapPin, Truck } from "lucide-react";
+import { CheckCircle2, Loader2, Minus, Plus, Tag, X, MapPin, Truck, Award } from "lucide-react";
 
 const schema = z
   .object({
@@ -48,6 +48,8 @@ export default function OrderForm({
 }) {
   const [quantity, setQuantity] = useState(1);
   const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
+  const [customerEmail, setCustomerEmail] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState<{ code: string; discount: number } | null>(null);
@@ -84,6 +86,38 @@ export default function OrderForm({
       .order("name")
       .then(({ data }) => setPickupLocations((data as unknown as PickupLocation[]) ?? []));
   }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
+      if (!user) return;
+
+      const { data: customer } = await supabase
+        .from("customers")
+        .select("id, name, phone, email")
+        .eq("auth_user_id", user.id)
+        .single();
+      if (!customer) return;
+
+      setValue("name", (customer as any).name ?? "");
+      setValue("phone", (customer as any).phone ?? "");
+      setCustomerEmail((customer as any).email ?? null);
+
+      const { data: address } = await supabase
+        .from("customer_addresses")
+        .select("district, full_address")
+        .eq("customer_id", (customer as any).id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (address) {
+        setValue("district", (address as any).district ?? "");
+        setValue("address", (address as any).full_address ?? "");
+      }
+    })();
+  }, [setValue]);
 
   const deliveryCharge = useMemo(() => {
     if (deliveryMethod === "pickup") return 0;
@@ -136,6 +170,15 @@ export default function OrderForm({
     }
 
     const result = data[0];
+
+    if (customerEmail) {
+      fetch("/api/orders/send-confirmation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: result.order_id }),
+      }).catch(() => {});
+    }
+
     setState({ status: "success", orderNumber: result.order_number, grandTotal: result.grand_total });
   }
 
@@ -155,6 +198,15 @@ export default function OrderForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="rounded-2xl border border-ink/10 bg-white p-5 space-y-4">
+      {isLoggedIn === false && (
+        <a
+          href="/account/register"
+          className="flex items-center gap-2 rounded-xl bg-gold-100 border border-gold px-3 py-2.5 text-xs font-medium text-ink hover:bg-gold-200 transition-colors"
+        >
+          <Award className="h-4 w-4 text-gold-600 shrink-0" />
+          Sign up and order to earn reward points, claim your Bhai Brother Membership Card, and create your own discount coupons!
+        </a>
+      )}
       <div className="flex items-center justify-between">
         <p className="spec-readout text-xs text-gold-600">Order Now — Cash on Delivery</p>
         <div className="flex items-center gap-3 rounded-full border border-ink/15 px-1.5 py-1">
