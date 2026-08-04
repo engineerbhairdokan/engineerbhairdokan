@@ -30,9 +30,13 @@ const NAV_ITEMS = [
 export default function AdminSidebar({
   mobileOpen,
   onClose,
+  businessName,
+  logoUrl,
 }: {
   mobileOpen: boolean;
   onClose: () => void;
+  businessName: string;
+  logoUrl: string | null;
 }) {
   const pathname = usePathname();
 
@@ -55,10 +59,15 @@ export default function AdminSidebar({
         }`}
       >
         <div className="flex items-center justify-between px-5 py-4">
-          <Link href="/admin" className="flex items-center gap-2" onClick={onClose}>
-            <PlusCircle className="h-5 w-5 text-gold-600" />
-            <span className="font-display text-lg font-semibold text-ink">
-              Engineer Bhai&apos;r Dokan
+          <Link href="/admin" className="flex items-center gap-2 min-w-0" onClick={onClose}>
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoUrl} alt={businessName} className="h-7 w-7 rounded-md object-contain shrink-0" />
+            ) : (
+              <PlusCircle className="h-5 w-5 text-gold-600 shrink-0" />
+            )}
+            <span className="font-display text-lg font-semibold text-ink truncate">
+              {businessName}
             </span>
           </Link>
           <button

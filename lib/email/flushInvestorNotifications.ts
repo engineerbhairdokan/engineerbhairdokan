@@ -8,7 +8,7 @@ export async function flushInvestorNotificationEmails(limit = 25) {
   const { data: pending, error } = await supabase
     .from("investor_notifications")
     .select("id, title, body, investors(name, email)")
-    .eq("email_status", "pending")
+    .in("email_status", ["pending", "failed"])
     .order("created_at", { ascending: true })
     .limit(limit);
 
@@ -17,7 +17,7 @@ export async function flushInvestorNotificationEmails(limit = 25) {
   for (const notif of pending as any[]) {
     const email = notif.investors?.email;
     if (!email) {
-      await supabase.from("investor_notifications").update({ email_status: "failed" }).eq("id", notif.id);
+      await supabase.from("investor_notifications").update({ email_status: "failed", email_error: "Investor has no email on file" }).eq("id", notif.id);
       continue;
     }
 
@@ -38,7 +38,10 @@ export async function flushInvestorNotificationEmails(limit = 25) {
 
     await supabase
       .from("investor_notifications")
-      .update({ email_status: result.success ? "sent" : "failed" })
+      .update({
+        email_status: result.success ? "sent" : "failed",
+        email_error: result.success ? null : (result.error ?? "Unknown error"),
+      })
       .eq("id", notif.id);
   }
 }

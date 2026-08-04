@@ -103,6 +103,12 @@ export async function adjustInvestorBalance(investorId: string, amount: number, 
   return { success: true };
 }
 
+export async function retryFailedInvestorEmails() {
+  await flushInvestorNotificationEmails(50);
+  revalidatePath("/admin/investors");
+  return { success: true };
+}
+
 export async function approveInvestor(investorId: string) {
   const supabase = await createClient();
   const { error } = await supabase.rpc("admin_approve_investor", { p_investor_id: investorId });

@@ -8,6 +8,7 @@ import { CartProvider } from "@/lib/cart/CartContext";
 import { headers } from "next/headers";
 import { getContactInfo } from "@/lib/queries";
 import { getCurrentCustomer } from "@/lib/customer/auth";
+import InvestorSiteHeader from "@/components/investor/InvestorSiteHeader";
 
 const baloo = Baloo_2({ subsets: ["latin"], variable: "--font-baloo", weight: ["500", "600", "700", "800"] });
 const workSans = Work_Sans({ subsets: ["latin"], variable: "--font-worksans", weight: ["400", "500", "600"] });
@@ -31,15 +32,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const customer = await getCurrentCustomer();
   const pathname = (await headers()).get("x-pathname") ?? "";
   const isAdminRoute = pathname.startsWith("/admin");
+  const isInvestRoute = pathname.startsWith("/invest");
 
   return (
     <html lang="en" className={`${baloo.variable} ${workSans.variable} ${plexMono.variable}`}>
       <body className="font-body antialiased flex min-h-screen flex-col">
         <CartProvider>
-          {!isAdminRoute && <Header contact={contact} customerName={customer?.name ?? null} />}
+          {!isAdminRoute && !isInvestRoute && <Header contact={contact} customerName={customer?.name ?? null} />}
+          {isInvestRoute && <InvestorSiteHeader businessName={contact?.business_name ?? "Engineer Bhai'r Dokan"} logoUrl={contact?.logo_url ?? null} />}
           <main className="flex-1">{children}</main>
-          {!isAdminRoute && <Footer contact={contact} />}
-          {!isAdminRoute && <WhatsAppFloatButton whatsapp={contact?.whatsapp ?? null} />}
+          {!isAdminRoute && !isInvestRoute && <Footer contact={contact} />}
+          {!isAdminRoute && !isInvestRoute && <WhatsAppFloatButton whatsapp={contact?.whatsapp ?? null} />}
         </CartProvider>
       </body>
     </html>

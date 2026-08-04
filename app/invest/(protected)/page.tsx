@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
 import StatusBadge from "@/components/admin/StatusBadge";
 import WithdrawButton from "./WithdrawButton";
-import { Package, Bell, TrendingUp, TrendingDown, ShoppingBag, Truck, CheckCircle2, RotateCcw } from "lucide-react";
+import { Package, TrendingUp, TrendingDown, ShoppingBag, Truck, CheckCircle2, RotateCcw } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -27,29 +27,15 @@ export default async function InvestorDashboardPage({
   const { data: investorRow } = await supabase.from("investors").select("id").eq("auth_user_id", user!.id).single();
   const investorId = (investorRow as any)?.id;
 
-  const [investmentsResult, ledgerResult, notifsResult] = await Promise.all([
+  const [investmentsResult] = await Promise.all([
     supabase
       .from("product_investments")
-      .select("id, product_id, amount, profit_percent, loss_percent, stock_at_investment, status, invested_at, products(name, current_stock)")
+      .select("id, product_id, amount, profit_percent, loss_percent, stock_at_investment, status, invested_at, products(name, current_stock, total_cost, regular_price, low_stock_threshold)")
       .eq("investor_id", investorId)
       .order("invested_at", { ascending: false }),
-    supabase
-      .from("investor_ledger")
-      .select("id, entry_type, amount, note, created_at")
-      .eq("investor_id", investorId)
-      .order("created_at", { ascending: false })
-      .limit(15),
-    supabase
-      .from("investor_notifications")
-      .select("id, title, body, notif_type, is_read, created_at")
-      .eq("investor_id", investorId)
-      .order("created_at", { ascending: false })
-      .limit(8),
   ]);
 
   const investments = (investmentsResult.data ?? []) as any[];
-  const ledger = (ledgerResult.data ?? []) as any[];
-  const notifications = (notifsResult.data ?? []) as any[];
 
   const investmentIds = investments.map((i) => i.id);
   let plMap = new Map<string, number>();
@@ -66,6 +52,25 @@ export default async function InvestorDashboardPage({
 
   // ALL orders touching invested products (no cap) — admin-style visibility
   const productIds = [...new Set(investments.map((i) => i.product_id))];
+
+  // Stock value scoped to only the investor's own invested products
+  const uniqueProducts = new Map<string, any>();
+  for (const inv of investments) {
+    if (inv.product_id && inv.products && !uniqueProducts.has(inv.product_id)) {
+      uniqueProducts.set(inv.product_id, inv.products);
+    }
+  }
+  let stockAtCost = 0;
+  let stockAtRetail = 0;
+  let lowStockCount = 0;
+  let outOfStockCount = 0;
+  for (const p of uniqueProducts.values()) {
+    const stock = p.current_stock ?? 0;
+    stockAtCost += stock * (Number(p.total_cost) || 0);
+    stockAtRetail += stock * (Number(p.regular_price) || 0);
+    if (stock === 0) outOfStockCount += 1;
+    else if (stock <= (p.low_stock_threshold ?? 0)) lowStockCount += 1;
+  }
   let allOrderRows: any[] = [];
   if (productIds.length > 0) {
     let q = supabase
@@ -170,6 +175,23 @@ export default async function InvestorDashboardPage({
       </section>
 
       {productIds.length > 0 && (
+        <div className="rounded-2xl bg-white border border-ink/10 p-5 max-w-sm">
+          <h2 className="font-display font-bold text-ink mb-4">Stock Value</h2>
+          <InvestorStat label="At Cost" value={formatBDT(stockAtCost)} />
+          <div className="h-3" />
+          <InvestorStat label="At Retail" value={formatBDT(stockAtRetail)} />
+          <div className="mt-4 flex justify-between text-sm">
+            <span className="text-ink/50">Low Stock</span>
+            <span className="font-medium text-ink">{lowStockCount}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-ink/50">Out of Stock</span>
+            <span className="font-medium text-red-600">{outOfStockCount}</span>
+          </div>
+        </div>
+      )}
+
+      {productIds.length > 0 && (
         <section>
           <h2 className="font-display font-bold text-ink mb-3 flex items-center gap-2">
             <Package className="h-4 w-4 text-gold-600" /> Orders for Your Products
@@ -184,15 +206,6 @@ export default async function InvestorDashboardPage({
               <p className="spec-readout text-[10px] text-ink/40">Delivered Revenue</p>
               <p className="font-display font-bold text-xl text-ink mt-1">{formatBDT(totalRevenue)}</p>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 mb-3 text-xs">
-            <Link href="/invest" className={`rounded-full px-3 py-1.5 ${!statusFilter ? "bg-ink text-cream" : "bg-white border border-ink/15 text-ink/60"}`}>All</Link>
-            {ALL_STATUSES.map((s) => (
-              <Link key={s} href={`/invest?status=${s}`} className={`rounded-full px-3 py-1.5 capitalize ${statusFilter === s ? "bg-ink text-cream" : "bg-white border border-ink/15 text-ink/60"}`}>
-                {s.replace(/_/g, " ")} ({statusCounts[s]})
-              </Link>
-            ))}
           </div>
 
           <div className="rounded-2xl border border-ink/10 bg-white overflow-hidden">
@@ -225,51 +238,6 @@ export default async function InvestorDashboardPage({
         </section>
       )}
 
-      <section>
-        <h2 className="font-display font-bold text-ink mb-3 flex items-center gap-2">
-          <Bell className="h-4 w-4 text-gold-600" /> Notifications
-        </h2>
-        <div className="space-y-2">
-          {notifications.length === 0 && <p className="text-sm text-ink/40">No notifications yet.</p>}
-          {notifications.map((n) => (
-            <div key={n.id} className={`rounded-xl border p-3 text-sm ${n.is_read ? "border-ink/10 bg-white" : "border-gold bg-gold-100"}`}>
-              <p className="font-medium text-ink">{n.title}</p>
-              {n.body && <p className="text-ink/60 text-xs mt-0.5">{n.body}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="font-display font-bold text-ink mb-3">Transaction History</h2>
-        <div className="rounded-2xl border border-ink/10 bg-white overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-cream text-left text-xs text-ink/50 spec-readout">
-              <tr>
-                <th className="px-4 py-2.5">Type</th>
-                <th className="px-4 py-2.5">Note</th>
-                <th className="px-4 py-2.5">Amount</th>
-                <th className="px-4 py-2.5">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledger.map((l) => (
-                <tr key={l.id} className="border-t border-ink/5">
-                  <td className="px-4 py-2.5 capitalize text-ink">{l.entry_type}</td>
-                  <td className="px-4 py-2.5 text-ink/60">{l.note}</td>
-                  <td className={`px-4 py-2.5 font-medium ${Number(l.amount) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                    {Number(l.amount) >= 0 ? "+" : ""}{formatBDT(Number(l.amount))}
-                  </td>
-                  <td className="px-4 py-2.5 text-ink/40">{new Date(l.created_at).toLocaleDateString("en-GB")}</td>
-                </tr>
-              ))}
-              {ledger.length === 0 && (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-ink/40">No transactions yet.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
   );
 }
@@ -282,6 +250,15 @@ function StatCard({ icon: Icon, label, value, highlight }: { icon: any; label: s
         <p className="spec-readout text-[10px]">{label}</p>
       </div>
       <p className="font-display font-bold text-xl text-ink mt-1">{value}</p>
+    </div>
+  );
+}
+
+function InvestorStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="spec-readout text-[10px] text-ink/40">{label}</p>
+      <p className="font-display font-bold text-ink">{value}</p>
     </div>
   );
 }

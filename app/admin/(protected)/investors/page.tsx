@@ -1,23 +1,26 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
-import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon, UserCheck, Gift } from "lucide-react";
+import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon, UserCheck, Gift, AlertTriangle } from "lucide-react";
+import RetryEmailsButton from "./RetryEmailsButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function InvestorsPage() {
   const supabase = await createClient();
 
-  const [investorsResult, balancesResult, pendingDepositsResult, pendingWithdrawalsResult] = await Promise.all([
+  const [investorsResult, balancesResult, pendingDepositsResult, pendingWithdrawalsResult, failedEmailsResult] = await Promise.all([
     supabase.from("investors").select("id, name, phone, email, status, created_at").order("created_at", { ascending: false }),
     supabase.from("investor_balances").select("investor_id, balance"),
     supabase.from("investor_deposits").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("investor_withdrawal_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("investor_notifications").select("id, title, email_error, created_at").eq("email_status", "failed").order("created_at", { ascending: false }).limit(5),
   ]);
 
   const investors = (investorsResult.data ?? []) as any[];
   const balances = new Map(((balancesResult.data as any[]) ?? []).map((b) => [b.investor_id, Number(b.balance)]));
   const pendingDeposits = pendingDepositsResult.count ?? 0;
+  const failedEmails = (failedEmailsResult.data ?? []) as any[];
   const pendingWithdrawals = pendingWithdrawalsResult.count ?? 0;
   const pendingApprovals = investors.filter((i) => i.status === "pending_approval").length;
 
@@ -39,6 +42,24 @@ export default async function InvestorsPage() {
           </Link>
         </div>
       </div>
+
+      {failedEmails.length > 0 && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-red-700">
+              <AlertTriangle className="h-4 w-4" /> {failedEmails.length} recent email(s) failed to send
+            </p>
+            <RetryEmailsButton />
+          </div>
+          <div className="space-y-1">
+            {failedEmails.map((f) => (
+              <p key={f.id} className="text-xs text-red-700/80">
+                <span className="font-medium">{f.title}:</span> {f.email_error ?? "Unknown error"}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <StatCard label="Total Investors" value={investors.length.toString()} icon={TrendingUp} />
