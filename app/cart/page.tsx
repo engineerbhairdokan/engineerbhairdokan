@@ -42,6 +42,7 @@ export default function CartPage() {
   const [loadedSettings, setLoadedSettings] = useState(false);
   const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
   const [customerEmail, setCustomerEmail] = useState<string | null>(null);
+  const [membershipDiscountPercent, setMembershipDiscountPercent] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   const [couponCode, setCouponCode] = useState("");
@@ -93,7 +94,7 @@ export default function CartPage() {
 
       const { data: customer } = await supabase
         .from("customers")
-        .select("id, name, phone, email")
+        .select("id, name, phone, email, membership_status, membership_discount_percent, membership_valid_until")
         .eq("auth_user_id", user.id)
         .single();
       if (!customer) return;
@@ -101,6 +102,10 @@ export default function CartPage() {
       setValue("name", (customer as any).name ?? "");
       setValue("phone", (customer as any).phone ?? "");
       setCustomerEmail((customer as any).email ?? null);
+
+      const c = customer as any;
+      const membershipValid = c.membership_status === "active" && (!c.membership_valid_until || c.membership_valid_until >= new Date().toISOString().slice(0, 10));
+      if (membershipValid) setMembershipDiscountPercent(c.membership_discount_percent ?? 0);
 
       const { data: address } = await supabase
         .from("customer_addresses")
@@ -122,7 +127,9 @@ export default function CartPage() {
     return district === "Dhaka" ? insideDhaka : outsideDhaka;
   }, [deliveryMethod, district, insideDhaka, outsideDhaka]);
 
-  const discount = couponApplied?.discount ?? 0;
+  const membershipDiscount = Math.round((subtotal * membershipDiscountPercent) / 100);
+  const couponDiscount = couponApplied?.discount ?? 0;
+  const discount = membershipDiscount + couponDiscount;
   const grandTotal = subtotal - discount + (deliveryCharge ?? 0);
 
   async function applyCoupon() {
@@ -167,6 +174,12 @@ export default function CartPage() {
 
     const result = data[0];
     clearCart();
+
+    fetch("/api/orders/notify-admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId: result.order_id }),
+    }).catch(() => {});
 
     if (customerEmail) {
       fetch("/api/orders/send-confirmation", {
@@ -354,7 +367,10 @@ export default function CartPage() {
 
             <div className="rounded-xl bg-cream p-4 space-y-1.5 text-sm">
               <Row label="Subtotal" value={formatBDT(subtotal)} />
-              {discount > 0 && <Row label="Discount" value={`- ${formatBDT(discount)}`} />}
+              {membershipDiscount > 0 && (
+                <Row label={`Bhai Brother Discount (${membershipDiscountPercent}%)`} value={`- ${formatBDT(membershipDiscount)}`} />
+              )}
+              {couponDiscount > 0 && <Row label="Coupon Discount" value={`- ${formatBDT(couponDiscount)}`} />}
               <Row label="Delivery Charge" value={deliveryMethod === "pickup" ? formatBDT(0) : deliveryCharge === null ? "Select district" : formatBDT(deliveryCharge)} />
               <div className="border-t border-ink/10 pt-1.5 mt-1.5">
                 <Row label="Grand Total" value={formatBDT(grandTotal)} bold />

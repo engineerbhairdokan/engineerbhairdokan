@@ -2,11 +2,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { PlusCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 const STATUSES = ["pending","confirmed","processing","packed","handed_to_courier","in_transit","delivered","returned","cancelled"];
-const SOURCES = ["website","facebook","messenger","whatsapp","phone_call","walk_in"];
+const SOURCES = ["website","facebook","messenger","whatsapp","phone_call","walk_in","daraz","merchant","chat"];
 
 export default async function OrdersPage({
   searchParams,
@@ -43,11 +44,16 @@ export default async function OrdersPage({
           <p className="spec-readout text-xs text-gold-600">Sales</p>
           <h1 className="font-display font-bold text-2xl text-ink">Orders</h1>
         </div>
-        <form action="/admin/orders" className="flex gap-2">
-          {status && <input type="hidden" name="status" value={status} />}
-          {source && <input type="hidden" name="source" value={source} />}
-          <input name="q" defaultValue={q} placeholder="Search order#, name, phone" className="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm" />
-        </form>
+        <div className="flex gap-2">
+          <Link href="/admin/orders/new" className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-cream hover:bg-ink-700">
+            <PlusCircle className="h-4 w-4" /> New Order
+          </Link>
+          <form action="/admin/orders" className="flex gap-2">
+            {status && <input type="hidden" name="status" value={status} />}
+            {source && <input type="hidden" name="source" value={source} />}
+            <input name="q" defaultValue={q} placeholder="Search order#, name, phone" className="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm" />
+          </form>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 text-sm">

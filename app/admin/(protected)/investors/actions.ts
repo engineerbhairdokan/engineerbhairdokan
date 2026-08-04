@@ -143,6 +143,15 @@ export async function getSignedInvestorDocUrl(path: string) {
   return data?.signedUrl ?? null;
 }
 
+export async function updateSampleClaimStatus(claimId: string, status: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("investor_sample_claims").update({ status }).eq("id", claimId);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/investors/samples");
+  flushInvestorNotificationEmails().catch((e) => console.error("Email flush failed", e));
+  return { success: true };
+}
+
 export async function toggleInvestorStatus(investorId: string, status: "active" | "suspended") {
   const supabase = await createClient();
   await supabase.from("investors").update({ status }).eq("id", investorId);

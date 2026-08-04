@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
-import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon, UserCheck } from "lucide-react";
+import { TrendingUp, FileClock, Wallet, Settings as SettingsIcon, UserCheck, Gift } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -30,9 +30,14 @@ export default async function InvestorsPage() {
           <p className="spec-readout text-xs text-gold-600">Investors</p>
           <h1 className="font-display font-bold text-2xl text-ink">Investor Management</h1>
         </div>
-        <Link href="/admin/investors/settings" className="flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-medium text-ink hover:bg-cream">
-          <SettingsIcon className="h-4 w-4" /> Settings
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/investors/samples" className="flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-medium text-ink hover:bg-cream">
+            <Gift className="h-4 w-4" /> Sample Claims
+          </Link>
+          <Link href="/admin/investors/settings" className="flex items-center gap-1.5 rounded-full border border-ink/15 px-4 py-2 text-sm font-medium text-ink hover:bg-cream">
+            <SettingsIcon className="h-4 w-4" /> Settings
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">

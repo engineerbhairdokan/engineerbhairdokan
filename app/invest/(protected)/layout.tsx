@@ -32,6 +32,7 @@ export default async function InvestorLayout({ children }: { children: React.Rea
       <div className="flex gap-2 mb-6 border-b border-ink/10 overflow-x-auto">
         <Link href="/invest" className="px-3 py-2 text-sm font-medium text-ink hover:text-gold-600 whitespace-nowrap">Dashboard</Link>
         <Link href="/invest/deposit" className="px-3 py-2 text-sm font-medium text-ink hover:text-gold-600 whitespace-nowrap">Deposit</Link>
+        <Link href="/invest/sample-order" className="px-3 py-2 text-sm font-medium text-ink hover:text-gold-600 whitespace-nowrap">Order Sample</Link>
       </div>
       {children}
     </div>

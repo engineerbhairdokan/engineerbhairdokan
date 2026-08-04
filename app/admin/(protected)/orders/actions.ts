@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { flushInvestorNotificationEmails } from "@/lib/email/flushInvestorNotifications";
+import { sendOrderStatusEmailToCustomer } from "@/lib/email/orderStatusEmail";
 
 const ORDER_STATUSES = [
   "pending", "confirmed", "processing", "packed", "handed_to_courier",
@@ -25,6 +26,10 @@ export async function updateOrderStatus(orderId: string, status: (typeof ORDER_S
 
   if (status === "delivered" || status === "returned" || status === "cancelled") {
     flushInvestorNotificationEmails().catch((e) => console.error("Email flush failed", e));
+  }
+
+  if (status === "confirmed" || status === "handed_to_courier" || status === "delivered") {
+    sendOrderStatusEmailToCustomer(orderId, status).catch((e) => console.error("Customer status email failed", e));
   }
 
   return { success: true };

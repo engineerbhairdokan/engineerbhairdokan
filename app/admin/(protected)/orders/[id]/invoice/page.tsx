@@ -22,68 +22,96 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   if (!order || !invoice) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl bg-white p-10 print:p-0 text-ink">
-      <div className="mb-6 print:hidden flex justify-end">
+    <div className="flex justify-center bg-ink/5 py-8 print:bg-white print:py-0">
+      <div className="mb-6 print:hidden fixed top-4 right-4">
         <PrintButton />
       </div>
 
-      <div className="flex items-start justify-between border-b border-ink/10 pb-6">
-        <div>
-          <h1 className="font-display font-bold text-2xl">{contact?.business_name ?? "Engineer Bhai'r Dokan"}</h1>
-          {contact?.address && <p className="text-sm text-ink/60 mt-1">{contact.address}</p>}
-          {contact?.phone && <p className="text-sm text-ink/60">{contact.phone}</p>}
+      {/* 80mm thermal receipt */}
+      <div className="receipt bg-white text-ink px-3 py-4 font-mono text-[11px] leading-snug">
+        <div className="text-center">
+          <p className="font-bold text-sm">{contact?.business_name ?? "Engineer Bhai'r Dokan"}</p>
+          {contact?.address && <p>{contact.address}</p>}
+          {contact?.phone && <p>{contact.phone}</p>}
         </div>
-        <div className="text-right">
-          <p className="font-display font-bold text-lg">INVOICE</p>
-          <p className="text-sm text-ink/60">{invoice.invoice_number}</p>
-          <p className="text-xs text-ink/40">{new Date(invoice.generated_at).toLocaleDateString("en-GB")}</p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 gap-6 py-6 text-sm">
-        <div>
-          <p className="spec-readout text-[10px] text-ink/40 mb-1">Bill To</p>
-          <p className="font-medium">{order.customer_name}</p>
-          <p className="text-ink/60">{order.customer_phone}</p>
-          <p className="text-ink/60">{order.full_address}, {order.district}</p>
-        </div>
-        <div className="text-right">
-          <p className="spec-readout text-[10px] text-ink/40 mb-1">Order</p>
-          <p className="font-medium">{order.order_number}</p>
-          {order.couriers?.name && <p className="text-ink/60">Courier: {order.couriers.name}</p>}
-          {order.couriers?.merchant_code && <p className="text-ink/60">Merchant Code: {order.couriers.merchant_code}</p>}
-          {order.tracking_number && <p className="text-ink/60">Tracking: {order.tracking_number}</p>}
-        </div>
-      </div>
+        <div className="dashed my-2" />
 
-      <table className="w-full text-sm border-t border-ink/10">
-        <thead>
-          <tr className="text-left spec-readout text-[10px] text-ink/40">
-            <th className="py-2">Item</th><th className="py-2">Qty</th><th className="py-2">Price</th><th className="py-2 text-right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(items ?? []).map((it) => (
-            <tr key={it.id} className="border-t border-ink/5">
-              <td className="py-2">{it.product_name}</td>
-              <td className="py-2">{it.quantity}</td>
-              <td className="py-2">{formatBDT(it.unit_price)}</td>
-              <td className="py-2 text-right">{formatBDT(it.line_total)}</td>
-            </tr>
+        <div>
+          <Row label="Invoice#" value={invoice.invoice_number} />
+          <Row label="Order#" value={order.order_number} />
+          <Row label="Date" value={new Date(invoice.generated_at).toLocaleDateString("en-GB")} />
+        </div>
+
+        <div className="dashed my-2" />
+
+        <div>
+          <p className="font-bold">BILL TO</p>
+          <p>{order.customer_name}</p>
+          <p>{order.customer_phone}</p>
+          {order.delivery_method === "pickup" ? (
+            <p>Pickup order</p>
+          ) : (
+            <p className="whitespace-pre-wrap">{order.full_address}, {order.district}</p>
+          )}
+        </div>
+
+        <div className="dashed my-2" />
+
+        {order.couriers?.name && <Row label="Courier" value={order.couriers.name} />}
+        {order.couriers?.merchant_code && <Row label="Merchant" value={order.couriers.merchant_code} />}
+        {order.tracking_number && <Row label="Tracking" value={order.tracking_number} />}
+        {(order.couriers?.name || order.tracking_number) && <div className="dashed my-2" />}
+
+        <div>
+          {items.map((it) => (
+            <div key={it.id} className="mb-1">
+              <p className="truncate">{it.product_name}</p>
+              <div className="flex justify-between">
+                <span>{it.quantity} x {formatBDT(it.unit_price)}</span>
+                <span>{formatBDT(it.line_total)}</span>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
-
-      <div className="mt-4 ml-auto max-w-xs space-y-1 text-sm">
-        <div className="flex justify-between"><span className="text-ink/50">Subtotal</span><span>{formatBDT(order.subtotal)}</span></div>
-        <div className="flex justify-between"><span className="text-ink/50">Discount</span><span>- {formatBDT(order.discount_amount)}</span></div>
-        <div className="flex justify-between"><span className="text-ink/50">Delivery Charge</span><span>{formatBDT(order.delivery_charge)}</span></div>
-        <div className="flex justify-between border-t border-ink/10 pt-1.5 font-display font-bold">
-          <span>Grand Total</span><span>{formatBDT(order.grand_total)}</span>
         </div>
+
+        <div className="dashed my-2" />
+
+        <Row label="Subtotal" value={formatBDT(order.subtotal)} />
+        {order.discount_amount > 0 && <Row label="Discount" value={`- ${formatBDT(order.discount_amount)}`} />}
+        <Row label="Delivery" value={formatBDT(order.delivery_charge)} />
+
+        <div className="dashed my-2" />
+
+        <div className="flex justify-between font-bold text-sm">
+          <span>TOTAL</span>
+          <span>{formatBDT(order.grand_total)}</span>
+        </div>
+
+        <div className="dashed my-2" />
+
+        <p className="text-center font-bold">CASH ON DELIVERY</p>
+        <p className="text-center mt-2">Thank you for shopping with us!</p>
+        <p className="text-center">Engineer Approved, Customer Loved</p>
       </div>
 
-      <p className="mt-8 text-center text-xs text-ink/40 spec-readout">Payment Method: Cash on Delivery</p>
+      <style>{`
+        .receipt { width: 80mm; }
+        .dashed { border-top: 1px dashed #999; }
+        @media print {
+          @page { size: 80mm auto; margin: 0; }
+          body { margin: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between">
+      <span>{label}</span>
+      <span>{value}</span>
     </div>
   );
 }
