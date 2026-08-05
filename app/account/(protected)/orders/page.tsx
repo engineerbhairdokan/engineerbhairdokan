@@ -2,7 +2,8 @@ import { getCurrentCustomer } from "@/lib/customer/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatBDT } from "@/lib/pricing";
 import StatusBadge from "@/components/admin/StatusBadge";
-import { Coins } from "lucide-react";
+import { Coins, FileText } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,13 @@ export default async function OrderHistoryPage() {
                 </span>
               )}
             </div>
+            <Link
+              href={`/account/orders/${o.id}/invoice`}
+              target="_blank"
+              className="mt-3 flex items-center justify-center gap-1.5 rounded-full border border-ink/15 py-2 text-xs font-medium text-ink hover:bg-cream"
+            >
+              <FileText className="h-3.5 w-3.5" /> View Invoice
+            </Link>
           </div>
         );
       })}

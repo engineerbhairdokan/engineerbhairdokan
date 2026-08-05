@@ -37,12 +37,12 @@ export async function POST(req: NextRequest) {
     await sendBrevoEmail({
       to: email,
       toName: name,
-      subject: `Order Confirmed — ${(order as any).order_number}`,
+      subject: `Order Received — ${(order as any).order_number}`,
       html: `
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
           <h2 style="color: #1B2433;">Thanks for your order, ${name}!</h2>
           <p style="color: #4b5563; line-height: 1.6;">
-            Your order <strong>${(order as any).order_number}</strong> has been received and is being processed.
+            Your order <strong>${(order as any).order_number}</strong> has been received. Our team will review and confirm it shortly — you'll get another email once it's confirmed.
           </p>
           <ul style="color: #4b5563; line-height: 1.8;">${itemsHtml}</ul>
           <p style="color: #1B2433; font-weight: bold; font-size: 16px;">

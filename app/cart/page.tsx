@@ -189,6 +189,11 @@ export default function CartPage() {
       }).catch(() => {});
     }
 
+    // Investor "New Order Placed" emails are queued in investor_notifications by a
+    // DB trigger, but nothing was ever calling the flush endpoint on checkout, so
+    // they sat as "pending" forever. This actually sends them.
+    fetch("/api/investor-notifications/flush", { method: "POST" }).catch(() => {});
+
     setState({ status: "success", orderNumber: result.order_number, grandTotal: result.grand_total });
   }
 
@@ -196,11 +201,12 @@ export default function CartPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <CheckCircle2 className="mx-auto h-12 w-12 text-gold-600" />
-        <p className="font-display font-bold text-2xl text-ink mt-4">Order Confirmed!</p>
+        <p className="font-display font-bold text-2xl text-ink mt-4">Order Received!</p>
         <p className="text-ink/60 mt-2">
           Order <span className="font-mono font-semibold">{state.orderNumber}</span> — Cash on Delivery,{" "}
           {formatBDT(state.grandTotal)} due on arrival.
         </p>
+        <p className="text-ink/50 text-sm mt-1">We'll confirm your order shortly.</p>
         <Link href="/products" className="mt-6 inline-block rounded-full bg-ink px-6 py-3 font-medium text-cream hover:bg-ink-700">
           Continue Shopping
         </Link>
