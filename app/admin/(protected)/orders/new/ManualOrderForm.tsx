@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { BANGLADESH_DISTRICTS } from "@/lib/districts";
 import { formatBDT } from "@/lib/pricing";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Truck, MapPin } from "lucide-react";
 
 type ProductOption = { id: string; name: string; sku: string; regular_price: number; current_stock: number };
 type CourierOption = { id: string; name: string };
+type PickupLocationOption = { id: string; name: string; address: string; phone: string | null };
 
 type LineItem = { productId: string; quantity: number; unitPrice: number; lineDiscount: number };
 
@@ -23,13 +24,23 @@ const SOURCES = [
   { value: "chat", label: "Website Chat" },
 ];
 
-export default function ManualOrderForm({ products, couriers }: { products: ProductOption[]; couriers: CourierOption[] }) {
+export default function ManualOrderForm({
+  products,
+  couriers,
+  pickupLocations,
+}: {
+  products: ProductOption[];
+  couriers: CourierOption[];
+  pickupLocations: PickupLocationOption[];
+}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [altPhone, setAltPhone] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">("delivery");
   const [district, setDistrict] = useState("");
   const [address, setAddress] = useState("");
+  const [pickupLocationId, setPickupLocationId] = useState("");
   const [source, setSource] = useState("facebook");
   const [courierId, setCourierId] = useState("");
   const [tracking, setTracking] = useState("");
@@ -57,8 +68,16 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
     e.preventDefault();
     setError(null);
 
-    if (!name || !phone || !district || !address || items.some((i) => !i.productId)) {
+    if (!name || !phone || items.some((i) => !i.productId)) {
       setError("Please fill in all required fields and select a product for each line.");
+      return;
+    }
+    if (deliveryMethod === "delivery" && (!district || !address)) {
+      setError("Please fill in the district and address, or switch to Store Pickup.");
+      return;
+    }
+    if (deliveryMethod === "pickup" && !pickupLocationId) {
+      setError("Please select a pickup location.");
       return;
     }
 
@@ -69,8 +88,8 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
       p_customer_name: name,
       p_phone: phone,
       p_alt_phone: altPhone || null,
-      p_district: district,
-      p_full_address: address,
+      p_district: deliveryMethod === "delivery" ? district : null,
+      p_full_address: deliveryMethod === "delivery" ? address : null,
       p_order_source: source as any,
       p_items: items.map((i) => ({
         product_id: i.productId,
@@ -78,9 +97,11 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
         unit_price: i.unitPrice,
         line_discount: i.lineDiscount,
       })),
-      p_courier_id: courierId || null,
-      p_tracking_number: tracking || null,
+      p_courier_id: deliveryMethod === "delivery" ? courierId || null : null,
+      p_tracking_number: deliveryMethod === "delivery" ? tracking || null : null,
       p_notes: notes || null,
+      p_delivery_method: deliveryMethod,
+      p_pickup_location_id: deliveryMethod === "pickup" ? pickupLocationId || null : null,
     });
     const data = rawData as any[] | null;
 
@@ -121,30 +142,67 @@ export default function ManualOrderForm({ products, couriers }: { products: Prod
           <Field label="Customer Name"><input value={name} onChange={(e) => setName(e.target.value)} className="input" /></Field>
           <Field label="Phone"><input value={phone} onChange={(e) => setPhone(e.target.value)} className="input" /></Field>
           <Field label="Alt Phone"><input value={altPhone} onChange={(e) => setAltPhone(e.target.value)} className="input" /></Field>
-          <Field label="District">
-            <select value={district} onChange={(e) => setDistrict(e.target.value)} className="input">
-              <option value="">Select district</option>
-              {BANGLADESH_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-          </Field>
-        </div>
-        <Field label="Full Address"><textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} className="input" /></Field>
-        <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Order Source">
             <select value={source} onChange={(e) => setSource(e.target.value)} className="input">
               {SOURCES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
             </select>
           </Field>
-          <Field label="Courier (optional)">
-            <select value={courierId} onChange={(e) => setCourierId(e.target.value)} className="input">
-              <option value="">Not assigned yet</option>
-              {couriers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </Field>
         </div>
-        {courierId && (
-          <Field label="Tracking Number"><input value={tracking} onChange={(e) => setTracking(e.target.value)} className="input" /></Field>
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setDeliveryMethod("delivery")}
+            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+              deliveryMethod === "delivery" ? "border-gold bg-gold-100 text-ink" : "border-ink/15 text-ink/50 hover:bg-cream"
+            }`}
+          >
+            <Truck className="h-4 w-4" /> Courier Delivery
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeliveryMethod("pickup")}
+            className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-sm font-medium transition-colors ${
+              deliveryMethod === "pickup" ? "border-gold bg-gold-100 text-ink" : "border-ink/15 text-ink/50 hover:bg-cream"
+            }`}
+          >
+            <MapPin className="h-4 w-4" /> Store Pickup
+          </button>
+        </div>
+
+        {deliveryMethod === "delivery" ? (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="District">
+                <select value={district} onChange={(e) => setDistrict(e.target.value)} className="input">
+                  <option value="">Select district</option>
+                  {BANGLADESH_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </Field>
+              <Field label="Courier (optional)">
+                <select value={courierId} onChange={(e) => setCourierId(e.target.value)} className="input">
+                  <option value="">Not assigned yet</option>
+                  {couriers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </Field>
+            </div>
+            <Field label="Full Address"><textarea value={address} onChange={(e) => setAddress(e.target.value)} rows={2} className="input" /></Field>
+            {courierId && (
+              <Field label="Tracking Number"><input value={tracking} onChange={(e) => setTracking(e.target.value)} className="input" /></Field>
+            )}
+          </>
+        ) : (
+          <Field label="Pickup Location">
+            <select value={pickupLocationId} onChange={(e) => setPickupLocationId(e.target.value)} className="input">
+              <option value="">Select a location</option>
+              {pickupLocations.map((loc) => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+            </select>
+            {pickupLocations.length === 0 && (
+              <p className="mt-1 text-xs text-ink/40">No pickup locations set up yet. Add one under Pickup Locations.</p>
+            )}
+          </Field>
         )}
+
         <Field label="Notes"><textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="input" /></Field>
       </div>
 

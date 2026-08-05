@@ -23,12 +23,12 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 space-y-14">
-      <div className="space-y-3">
+    <div className="mx-auto max-w-6xl px-4 py-3 sm:py-6 space-y-8 sm:space-y-14">
+      <div className="space-y-2 sm:space-y-3">
         <HeroSlider banners={banners} />
         <HeroCTAButtons whatsapp={contact?.whatsapp ?? null} />
         {categories.length > 0 && (
-          <div className="space-y-2 pt-1">
+          <div className="space-y-1.5 sm:space-y-2 pt-0.5 sm:pt-1">
             <p className="spec-readout text-xs text-gold-600">Browse</p>
             <CategoryPills categories={categories} />
           </div>
