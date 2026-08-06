@@ -9,8 +9,8 @@ import { Plus } from "lucide-react";
 const CATEGORIES = ["facebook_ads","google_ads","packaging","courier_charges","office_rent","salary","internet","electricity","transport","domain","hosting","software_subscription","miscellaneous"];
 const AD_CATEGORIES = ["facebook_ads", "google_ads"];
 
-type Expense = { id: string; category: string; amount: number; description: string | null; expense_date: string; product_id: string | null; products?: { name: string } | null };
-type Product = { id: string; name: string };
+type Expense = { id: string; category: string; amount: number; description: string | null; expense_date: string; product_id: string | null; ad_cost_per_unit: number | null; products?: { name: string } | null };
+type Product = { id: string; name: string; current_stock: number };
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -23,7 +23,7 @@ export default function ExpensesPage() {
     const supabase = createClient();
     const [{ data: exp }, { data: prod }] = await Promise.all([
       supabase.from("expenses").select("*, products(name)").order("expense_date", { ascending: false }).limit(100),
-      supabase.from("products").select("id, name").order("name"),
+      supabase.from("products").select("id, name, current_stock").order("name"),
     ]);
     setExpenses((exp as unknown as Expense[]) ?? []);
     setProducts((prod as unknown as Product[]) ?? []);
@@ -31,6 +31,11 @@ export default function ExpensesPage() {
   useEffect(() => { load(); }, []);
 
   const isAdCategory = AD_CATEGORIES.includes(form.category);
+  const selectedProduct = products.find((p) => p.id === form.productId);
+  const perUnitPreview =
+    isAdCategory && selectedProduct && form.amount > 0
+      ? form.amount / Math.max(selectedProduct.current_stock, 1)
+      : null;
 
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -82,8 +87,13 @@ export default function ExpensesPage() {
             <span className="mb-1 block text-xs font-medium text-ink/60">Which product is this ad spend for?</span>
             <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} required className="input">
               <option value="">Select product</option>
-              {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {products.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.current_stock} in stock)</option>)}
             </select>
+            {perUnitPreview !== null && (
+              <p className="mt-1.5 text-xs text-gold-600">
+                This will be split across {Math.max(selectedProduct!.current_stock, 1)} unit{selectedProduct!.current_stock === 1 ? "" : "s"} and add {formatBDT(perUnitPreview)} to {selectedProduct!.name}&apos;s per-unit cost.
+              </p>
+            )}
           </label>
         )}
 
@@ -96,7 +106,7 @@ export default function ExpensesPage() {
       <div className="rounded-2xl border border-ink/10 bg-white overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-cream text-left text-xs text-ink/50 spec-readout">
-            <tr><th className="px-4 py-3">Category</th><th className="px-4 py-3">Product</th><th className="px-4 py-3">Description</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Date</th><th className="px-4 py-3"></th></tr>
+            <tr><th className="px-4 py-3">Category</th><th className="px-4 py-3">Product</th><th className="px-4 py-3">Description</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Added to Cost/Unit</th><th className="px-4 py-3">Date</th><th className="px-4 py-3"></th></tr>
           </thead>
           <tbody>
             {expenses.map((e) => (
@@ -105,13 +115,14 @@ export default function ExpensesPage() {
                 <td className="px-4 py-3 text-ink/60">{e.products?.name ?? "—"}</td>
                 <td className="px-4 py-3 text-ink/60">{e.description ?? "—"}</td>
                 <td className="px-4 py-3 font-medium text-ink">{formatBDT(e.amount)}</td>
+                <td className="px-4 py-3 text-ink/60">{e.ad_cost_per_unit ? `+ ${formatBDT(e.ad_cost_per_unit)}` : "—"}</td>
                 <td className="px-4 py-3 text-ink/40">{new Date(e.expense_date).toLocaleDateString("en-GB")}</td>
                 <td className="px-4 py-3 text-right">
                   <button className="text-red-600 hover:underline" onClick={() => startTransition(async () => { await deleteExpense(e.id); load(); })}>Delete</button>
                 </td>
               </tr>
             ))}
-            {expenses.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-ink/40">No expenses recorded yet.</td></tr>}
+            {expenses.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-ink/40">No expenses recorded yet.</td></tr>}
           </tbody>
         </table>
       </div>

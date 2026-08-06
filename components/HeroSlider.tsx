@@ -29,7 +29,7 @@ export default function HeroSlider({ banners }: { banners: Banner[] }) {
 
   if (banners.length === 0) {
     return (
-      <div className="relative aspect-[16/9] sm:aspect-[2.5/1] rounded-2xl overflow-hidden bg-cream">
+      <div className="relative aspect-[3/1] rounded-2xl overflow-hidden bg-cream">
         <Image src="/banner.png" alt="Engineer Bhai'r Dokan" fill className="object-contain" priority />
       </div>
     );
@@ -40,7 +40,7 @@ export default function HeroSlider({ banners }: { banners: Banner[] }) {
       <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
         <div className="flex">
           {banners.map((b) => (
-            <div key={b.id} className="relative min-w-0 flex-[0_0_100%] aspect-[16/9] sm:aspect-[2.5/1] bg-cream">
+            <div key={b.id} className="relative min-w-0 flex-[0_0_100%] aspect-[3/1] bg-cream">
               {b.link_url ? (
                 <Link href={b.link_url}>
                   <Image src={b.image_url} alt={b.title ?? "Banner"} fill className="object-contain" priority />
